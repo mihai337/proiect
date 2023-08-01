@@ -9,5 +9,8 @@ mongo_db = MongoClient(db_url)
 db = mongo_db["Test"]
 coll = db.create_collection("TestColl")
 
+def search(email):
+    a=5
+
 
 print(mongo_db.list_database_names())
