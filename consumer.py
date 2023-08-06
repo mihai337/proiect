@@ -1,8 +1,11 @@
 from msg_broker import Rds
 from database import Database
 from json import loads,dumps
+import requests
+from models import User
 
 log = False
+NO_OF_TRIES = 3
 
 def process(message):
     results = Database.coll.find({"name" : message["name"]})
@@ -16,27 +19,58 @@ def process(message):
     return {"Error" : "Not found"}
 
 def login():
-    global username
-    global password
 
-    username = input("Username : ")
-    password = input("Password : ")
-    results = Database.coll.find({"name" : username})
-    for result in results:
-        if result["password"] == password:
+    for i in range(NO_OF_TRIES):
+        global username
+        global password
+        username = input("Username : ")
+        password = input("Password : ")
+
+        payload = {
+            "name" : username,
+            "password" : password
+        }
+        payload = dumps(payload)
+
+        response = requests.post("http://localhost:8000/login" , data=payload)
+        if response.status_code == 200:
+            print("\nLogin successfull\n")
             return True
-        print("Worng password, try again\n")
+    else:
         return False
-    print("Username not found, try again\n")
-    return False
+            
+
+def sign_in():
+
+    for i in range(NO_OF_TRIES):
+        username = input("Username : ")
+        password = input("Password : ")
+
+        payload = {
+            "name" : username,
+            "password" : password
+        }
+        payload = dumps(payload)
+
+        response = requests.post("http://localhost:8000/sign-in" , data=payload)
+        if response.status_code == 200:
+            print("\n\nSign in successfull, please log in\n\n")
+            login()
+            break
+        if i == NO_OF_TRIES:
+            print("\nTry again later\n")
+            exit()
 
 
-for i in range(5):
+choice = int(input("choices :\n  1. Sign-in\n  2. Login\n"))
+
+if choice == 1:
+    sign_in()
+elif choice == 2:
     log = login()
-    if log == True:
-        break
 else:
-    print("Too many tries")
+    print("choice not valid")
+    exit()
 
 while log:
     message_json = Rds.redis_conn.brpop("mod_queue")

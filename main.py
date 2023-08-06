@@ -26,22 +26,22 @@ def home():
 
 
 @app.post("/sign-in")
-def sign_in(username : str = Form(...) , password : str = Form(...) , balance : float = Form(...)):
-    results = Database.coll.find({"name" : username})
+def sign_in(user : User):
+    results = Database.coll.find({"name" : user.name})
     for result in results:
-        return {"Error" : "Try a unique username"}
-    Database.coll.insert_one({"name":username , "password":password , "balance":balance})
+        raise HTTPException(status_code=status.HTTP_302_FOUND)
+    Database.coll.insert_one({"name":user.name , "password":user.password , "balance":user.balance})
+    raise HTTPException(status_code=status.HTTP_200_OK)
 
 
 @app.post("/login")
-def login(username : str = Form(...) , password : str = Form(...)):
-    results = Database.coll.find({"name" : username})
+def login(user : User):
+    results = Database.coll.find({"name" : user.name})
     for result in results:
-        if result["password"] == password:
-            send_transactions(username,1)
-            return {"Username" : username , "Balance" : result["balance"]}
-        return {"Error" : "Wrong Password"}
-    return {"Error" : "Username not found"}
+        if result["password"] == user.password:
+            send_transactions(user.name,5)
+            raise HTTPException(status_code=status.HTTP_200_OK)
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 
 print(Database.mongo_db.list_database_names())
