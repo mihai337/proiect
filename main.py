@@ -35,11 +35,15 @@ def login(user : User):
 def send(user : User):
     for i in range(5):
         value = random.randint(-20,20)
-        message = {
-            "name" : user.name,
-            "value" : value
-        }
-        mjson = dumps(message)
-        Rds.redis_conn.lpush("mod_queue" , mjson)
+        results = Database.coll.find({"name" : user.name})
+        for result in results:
+            if result["balance"] + value < 0:
+                continue
+            message = {
+                "name" : user.name,
+                "value" : value
+            }
+            mjson = dumps(message)
+            Rds.redis_conn.lpush("mod_queue" , mjson)
 
 print(Database.mongo_db.list_database_names())
