@@ -42,5 +42,4 @@ def send(user : User):
         mjson = dumps(message)
         Rds.redis_conn.lpush("mod_queue" , mjson)
 
-
 print(Database.mongo_db.list_database_names())

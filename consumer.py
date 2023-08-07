@@ -4,6 +4,7 @@ from json import loads,dumps
 import requests
 from models import User
 from pprint import pprint
+from hasher import hash
 
 log = False
 NO_OF_TRIES = 3
@@ -50,6 +51,7 @@ def login():
         global password
         username = input("Username : ")
         password = input("Password : ")
+        password = hash(password)
 
         payload = {
             "name" : username,
@@ -71,6 +73,7 @@ def sign_in():
     for i in range(NO_OF_TRIES):
         username = input("Username : ")
         password = input("Password : ")
+        password = hash(password)
 
         payload = {
             "name" : username,
