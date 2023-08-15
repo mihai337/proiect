@@ -31,15 +31,24 @@ def transaction():
         }
         payload = dumps(payload)
         requests.post("http://localhost:8000/transactions" , data=payload)
-
+        count = 0
         while log:
-            message_json = Rds.redis_conn.brpop("mod_queue")
-            x,y = message_json
-            message = loads(y)
-            if message["name"] == username:
-                process(message)
-            else:
-                Rds.redis_conn.lpush("mod_queue" , dumps(message))
+            message_json = Rds.redis_conn.brpop("mod_queue" , timeout=3)
+            try:
+                _,y = message_json
+                message = loads(y)
+                if message["name"] == username:
+                    count = 0
+                    process(message)
+                else:
+                    count = count + 1
+                    Rds.redis_conn.lpush("mod_queue" , dumps(message))
+                    if count == 50:
+                        print("\nDONE\n")
+                        break
+            except:
+                print("\nDone\n")
+                break
     else:
         print("\nNe mai auzim")
         exit()
