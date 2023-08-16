@@ -5,6 +5,7 @@ import requests
 from models import User
 from pprint import pprint
 from hasher import hash
+from getpass import getpass
 
 log = False
 NO_OF_TRIES = 3
@@ -59,7 +60,7 @@ def login():
         global username
         global password
         username = input("Username : ")
-        password = input("Password : ")
+        password = getpass("Password : ")
         password = hash(password)
 
         payload = {
@@ -81,7 +82,18 @@ def login():
 def sign_in():
     for i in range(NO_OF_TRIES):
         username = input("Username : ")
-        password = input("Password : ")
+
+        for i in range(NO_OF_TRIES):
+            password = getpass("Password : ")
+            re_password = getpass("Re-Password : ")
+            if password == re_password:
+                break
+            else:
+                print("Passwords don't match, try again\n")
+        else:
+            print("Too many tries")
+            exit()
+
         password = hash(password)
 
         payload = {
@@ -95,9 +107,9 @@ def sign_in():
             print("\n\nSign in successfull, please log in\n\n")
             login()
             break
-        if i == NO_OF_TRIES:
-            print("\nTry again later\n")
-            exit()
+    else:
+        print("\nTry again later\n")
+        exit()
 
 choice = int(input("choices :\n  1. Sign-in\n  2. Login\n"))
 
