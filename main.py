@@ -5,7 +5,6 @@ from msg_broker import Rds
 import random
 from json import dumps
 
-
 app = FastAPI()
 
 
@@ -38,7 +37,7 @@ def send(user : User):
         results = Database.coll.find({"name" : user.name})
         for result in results:
             if result["balance"] + value < 0:
-                continue
+                value = -value
             message = {
                 "name" : user.name,
                 "value" : value
@@ -46,4 +45,4 @@ def send(user : User):
             mjson = dumps(message)
             Rds.redis_conn.lpush("mod_queue" , mjson)
 
-print(Database.mongo_db.list_database_names())
+# print(Database.mongo_db.list_database_names())

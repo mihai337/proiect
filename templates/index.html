@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Bank Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .login-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .signin-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .balance-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container" id="login-div">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <button type="button" onclick="dologin()">Login</button>
+            <p>New user? <a href="#" onclick="showRegistration()">Register here</a></p>
+        </form>
+
+    </div>
+
+    <div class="signin-container" id="signin-div" style="display: none;">
+        <h2>Sign-in</h2>
+        <form id="signinForm">
+            <label for="new-username">Username:</label>
+            <input type="text" id="new-username" name="new-username" required>
+
+            <label for="new-password">Password:</label>
+            <input type="password" id="new-password" name="new-password" required>
+
+            <label for="re-password">Re-Password:</label>
+            <input type="password" id="re-password" name="re-password" required>
+
+            <button type="button" onclick="dosignin()">Sign-in</button>
+            <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
+        </form>
+
+    </div>
+
+    <div class="balance-container" id="balanceSection" style="display: none;">
+        <h2>View/Modify Balance</h2>
+        <p>Welcome, <span id="loggedInUsername"></span>!</p>
+        <p>Your current balance is: <span id="balanceAmount">$0.00</span></p>
+        <label for="modifyAmount">Modify Balance:</label>
+        <!-- <input type="number" id="modifyAmount" name="modifyAmount" step="0.01"><br><br> -->
+        <button onclick="modifyBalance()">Update Balance</button>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <script>
+
+        let currentUser = null;
+
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response from the server
+                    console.log(data);
+                    // You can redirect or perform other actions based on the response
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
+
+        function dologin() {
+            var u = document.getElementById('username').value;
+            var p = document.getElementById('password').value;
+            if (u == '' || p == '') {
+                alert('Completaţi toate câmpurile');
+                return;
+            }
+
+            $.post('/login', { username: u, password: p }, function (data) {
+                if (data.code == '200') {
+                    currentUser = { username: u, balance: data.balance }
+                    showBalanceSection();
+                }
+                else{
+                    alert("Login failed");
+                }
+            }, 'json');
+        }
+
+        function dosignin() {
+            var u = document.getElementById('new-username').value;
+            var p = document.getElementById('new-password').value;
+            var rp = document.getElementById('re-password').value;
+            if (u == '' || p == '' || rp == '') {
+                alert('Completaţi toate câmpurile');
+                return;
+            }
+
+            $.post('/sign-in', { new_username: u, new_password: p, re_password: rp }, function (data) {
+                if (data.code != '200') {
+                    alert("Something went wrong")
+                }
+                else {
+                    alert("Successfully signed in, please log in!")
+                }
+            }, 'json');
+        }
+
+        function modifyBalance() {
+            // const modifyAmount = parseFloat(document.getElementById('modifyAmount').value);
+            // if (!isNaN(modifyAmount)) {
+            //     currentUser.balance += modifyAmount;
+            //     document.getElementById('balanceAmount').textContent = `$${currentUser.balance.toFixed(2)}`;
+            // } else {
+            //     alert('Please enter a valid number to modify the balance.');
+            // }
+
+            $.post('/trans' , {username : currentUser.username},function(data){
+                // $.currentUser.balance = data.balance;
+                if(data.code == '200')
+                    alert(" ");
+                document.getElementById("balanceAmount").textContent = "$" + data.modBalance+".00";
+            } , 'json')
+        }
+
+        function showRegistration() {
+            document.getElementById("login-div").style.display = 'none';
+            document.getElementById("signin-div").style.display = 'block';
+        }
+
+        function showLogin() {
+            document.getElementById('signin-div').style.display = 'none';
+            document.getElementById('login-div').style.display = 'block';
+        }
+
+        function showBalanceSection() {
+            document.getElementById('loggedInUsername').textContent = currentUser.username;
+            document.getElementById('balanceAmount').textContent = `$${currentUser.balance.toFixed(2)}`;
+            document.getElementById("username").textContent = '';
+            document.getElementById("password").textContent='';
+            document.getElementById('login-div').style.display = 'none';
+            document.getElementById('signin-div').style.display = 'none';
+            document.getElementById('balanceSection').style.display = 'block';
+        }
+
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('balanceSection').style.display = 'none';
+            document.getElementById('login-div').style.display = 'block';
+            document.getElementById('username').textContent = '';
+            document.getElementById("password").textContent='';
+
+        }
+
+    </script>
+</body>
+
+</html>
