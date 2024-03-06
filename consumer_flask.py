@@ -6,13 +6,15 @@ from models import User
 from pprint import pprint
 from hasher import hash
 from getpass import getpass
-from flask import Flask,render_template,request
+from flask import Flask,render_template,request,send_from_directory
 from fastapi import HTTPException,status
+import os
 
 log = False
 NO_OF_TRIES = 3
 
-app = Flask(__name__)
+app = Flask(__name__ )
+root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates", "scripts")
 
 def process(message):
     results = Database.coll.find({"name" : message["name"]})
@@ -62,61 +64,24 @@ def transaction():
                 return {"code" : "200" , "modBalance" : str(newbal)}
 
 
-
-@app.post("/login")
+@app.route("/login")
 def login():
-    username = request.form.get("username")
-    password = request.form.get("password")
-    password = hash(password)
+    return render_template("index.html")
 
-    payload = {
-        "name" : username,
-        "password" : password
-    }
-    payload = dumps(payload)
-
-    response = requests.post("http://localhost:8000/login" , data=payload)
-    if response.status_code == 200:
-        results = Database.coll.find({"name" : username})
-        for result in results:
-            balance = result["balance"]
-        print("\nLogin successfull\n")
-        # print(status.HTTP_200_OK)
-        # raise HTTPException(status_code=status.HTTP_200_OK)
-        return {"code" : "200" , "balance" : balance}
-    else:
-        return {"code":"404"}
-
-@app.post("/sign-in")
+@app.route("/sign-in")
 def sign_in():
-    username = request.form.get("new_username")
+    return render_template("signin.html")
 
-    password = request.form.get("new_password")
-    re_password = request.form.get("re_password")
-    if password != re_password:
-        return {"code":"400"}
-    
-    print(request.form)
-
-    password = hash(password)
-
-    payload = {
-        "name" : username,
-        "password" : password
-    }
-    payload = dumps(payload)
-
-    response = requests.post("http://localhost:8000/sign-in" , data=payload)
-    if response.status_code == 200:
-        return {"code":"200"}
-    else:
-        return {"code":"400"}
+@app.route("/scripts")
+def getScript():
+    return send_from_directory(root,"script.js")
     
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("welcome.html")
 
 
 if __name__ == "__main__":
+    print(root)
     app.run(host="0.0.0.0")
