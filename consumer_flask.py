@@ -64,9 +64,13 @@ def transaction():
                 return {"code" : "200" , "modBalance" : str(newbal)}
 
 
+@app.route("/index")
+def index():
+    return render_template("index.html")
+
 @app.route("/login")
 def login():
-    return render_template("index.html")
+    return render_template("login.html")
 
 @app.route("/sign-in")
 def sign_in():

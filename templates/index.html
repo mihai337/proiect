@@ -64,22 +64,10 @@
 </head>
 
 <body>
-    <div class="login-container" id="login-div" style="display: block;">
-        <h2>Login</h2>
-        <form id="loginForm">
-            <label for="username">Username:</label>
-            <input type="text" id="username" name="username" required>
 
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
+    <script src="/scripts"></script>
 
-            <button type="button" onclick="login()">Login</button>
-            <p>New user? <a href="/sign-in">Register here</a></p>
-        </form>
-
-    </div>
-
-    <div class="balance-container" id="balanceSection" style="display: none;">
+    <div class="balance-container" id="balanceSection" style="display: block;">
         <h2>View/Modify Balance</h2>
         <p>Welcome, <span id="loggedInUsername"></span>!</p>
         <p>Your current balance is: <span id="balanceAmount">$0.00</span></p>
@@ -90,7 +78,7 @@
         <button onclick="checkBalance()">Check Balance</button>
     </div>
 
-    <div class="transfer-container" id="transferSection" style="display: none;">
+    <div class="transfer-container" id="transferSection" style="display: block;">
         <h2>Send Money</h2>
         <label for="friend">Send to:</label>
         <input type="text" id="friend" name="friend">
@@ -101,14 +89,29 @@
         <button type="button" onclick="sendMoney()">Send</button>
     </div>
 
+    <div class="addfunds-container" id="addFundsSection" style="display: none;">
+        <h2>Deposit Money</h2>
+
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount">
+        
+        <button type="button" onclick="depositMoney()">Send</button>
+    </div>
+
+    <script>
+            document.getElementById('loggedInUsername').textContent = sessionStorage.getItem("username");
+            document.getElementById('balanceAmount').textContent = "$"+sessionStorage.getItem("balance")+".00";
+    </script>
+
     <script>
 
-        let currentUser = null;
+        // let currentUser = null;
 
         function sendMoney(){
             var f = document.getElementById("friend").value;
             var a = document.getElementById("amount").value;
-
+            var username = sessionStorage.getItem("username");
+            alert(username);
             if(f == ''){
                 alert("Do you even have friends?");
                 return;
@@ -119,7 +122,7 @@
                 return;
             }
 
-            fetch('http://192.168.1.10:8000/transfer?mainUser='+currentUser.username, {
+            fetch('http://192.168.1.105:8000/transfer?mainUser='+username, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -158,42 +161,6 @@
 
         }
 
-        function login() { //asta merge
-            var u = document.getElementById('username').value;
-            var p = document.getElementById('password').value;
-
-            if(u == '' || p == ''){
-                alert("Completati toate campurile");
-                return;
-            }
-
-            fetch('http://192.168.1.10:8000/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: u, password: p }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    // Handle the response from the server
-                    if(data.code == 200){
-                        currentUser = { username: u, password : p, balance: data.balance };
-                        // window.location.replace("/index");
-                        showBalanceSection()
-                    }
-                    else{
-                        alert("Login failed");
-                    }
-                    // showBalanceSection();
-                    // console.log(data);
-                    // You can redirect or perform other actions based on the response
-                })
-                .catch(error => {
-                    alert("Login failed");
-                    console.error('Error:', error);
-                });
-        }
 
         function modifyBalance() {
             // const modifyAmount = parseFloat(document.getElementById('modifyAmount').value);
@@ -212,20 +179,6 @@
             } , 'json')
         }
 
-        function showLogin() {
-            document.getElementById('signin-div').style.display = 'none';
-            document.getElementById('login-div').style.display = 'block';
-        }
-
-        function showBalanceSection() {
-            document.getElementById('loggedInUsername').textContent = currentUser.username;
-            document.getElementById('balanceAmount').textContent = `$${currentUser.balance.toFixed(2)}`;
-            document.getElementById("username").textContent = '';
-            document.getElementById("password").textContent='';
-            document.getElementById('login-div').style.display = 'none';
-            document.getElementById('balanceSection').style.display = 'block';
-            document.getElementById('transferSection').style.display = 'block';
-        }
 
         function logout() {
             currentUser = null;
@@ -238,9 +191,9 @@
 
         function checkBalance(){
 
-            var u = document.getElementById('username').value;
+            var u = sessionStorage.getItem("username");
 
-            fetch('http://192.168.1.10:8000/get-balance', {
+            fetch('http://192.168.1.105:8000/get-balance', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -251,7 +204,7 @@
                 .then(data => {
                     // Handle the response from the server
                     if(data.code == 200){
-                        currentUser.balance = data.balance;
+                        sessionStorage.setItem("balance" , data.balance);
                         document.getElementById("balanceAmount").textContent = "$" + data.balance+".00";
                     }
                     else{
@@ -261,12 +214,11 @@
                     // You can redirect or perform other actions based on the response
                 })
                 .catch(error => {
-                    alert("Login failed");
+                    alert("Error");
                     console.error('Error:', error);
                 });
         }
     
-
     </script>
 </body>
 
