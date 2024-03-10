@@ -40,6 +40,13 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
+        .addfunds-container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
         label {
             display: block;
             margin-bottom: 8px;
@@ -89,13 +96,13 @@
         <button type="button" onclick="sendMoney()">Send</button>
     </div>
 
-    <div class="addfunds-container" id="addFundsSection" style="display: none;">
+    <div class="addfunds-container" id="addFundsSection" style="display: block;">
         <h2>Deposit Money</h2>
 
-        <label for="amount">Amount:</label>
-        <input type="number" id="amount" name="amount">
+        <label for="depositAmount">Amount:</label>
+        <input type="number" id="depositAmount" name="amount">
         
-        <button type="button" onclick="depositMoney()">Send</button>
+        <button type="button" onclick="addFunds()">Send</button>
     </div>
 
     <script>
@@ -171,7 +178,7 @@
             //     alert('Please enter a valid number to modify the balance.');
             // }
 
-            $.post('/trans' , {username : currentUser.username},function(data){
+            $.post('/trans' , {username : sessionStorage.getItem("username")},function(data){
                 // $.currentUser.balance = data.balance;
                 if(data.code == '200')
                     alert(" ");
@@ -218,6 +225,37 @@
                     console.error('Error:', error);
                 });
         }
+
+        function addFunds(){
+
+            var u = sessionStorage.getItem("username");
+            var a = document.getElementById("depositAmount").value;
+
+            fetch('http://192.168.1.105:8000/addfunds', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: u , balance : a}),
+            })
+                .then(response => 
+                {
+                    // Handle the response from the server
+                    if(response.status == 200){
+                        // sessionStorage.setItem("balance" , data.balance);
+                        alert("Deposit successfull");
+                    }
+                    else{
+                        alert("Deposit failed");
+                    }
+                    // console.log(data);
+                    // You can redirect or perform other actions based on the response
+                })
+                .catch(error => {
+                    alert("Error");
+                    console.error('Error:', error);
+                });
+            }
     
     </script>
 </body>

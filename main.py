@@ -89,6 +89,16 @@ def transfer(mainUser : str , secondaryUser : PartialUser):
     # print(mainRes)
     raise HTTPException(status_code=status.HTTP_200_OK)
       
+@app.post("/addfunds")
+def addfunds(user : PartialUser):
+    results = Database.coll.find({"name" : user.name})
+    for result in results:
+        balance = int(result["balance"])
+        print(balance)
+        Database.coll.update_one({"name" : user.name} , {"$set" : {"balance" : balance+int(user.balance)}})
+        raise HTTPException(status_code=status.HTTP_200_OK)
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app" , host="0.0.0.0" , port=8000, reload=True)
