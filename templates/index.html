@@ -129,7 +129,7 @@
                 return;
             }
 
-            fetch('http://192.168.1.105:8000/transfer?mainUser='+username, {
+            fetch('http://192.168.1.34:8000/transfer?mainUser='+username, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -200,7 +200,7 @@
 
             var u = sessionStorage.getItem("username");
 
-            fetch('http://192.168.1.105:8000/get-balance', {
+            fetch('http://192.168.1.34:8000/get-balance', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -231,7 +231,7 @@
             var u = sessionStorage.getItem("username");
             var a = document.getElementById("depositAmount").value;
 
-            fetch('http://192.168.1.105:8000/addfunds', {
+            fetch('http://192.168.1.34:8000/addfunds', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
