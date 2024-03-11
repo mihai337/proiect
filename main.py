@@ -67,8 +67,11 @@ def get_balance(user : PartialUser):
 
 @app.post("/transfer/")
 def transfer(mainUser : str , secondaryUser : PartialUser):
-    if(not secondaryUser.balance.isnumeric()):
-        raise HTTPException(status_code=status.HTTP_424_FAILED_DEPENDENCY)
+    # if(not secondaryUser.balance.isnumeric()):
+    #     raise HTTPException(status_code=status.HTTP_424_FAILED_DEPENDENCY)
+    
+    if(float(secondaryUser.balance) < 0):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     
     mainRes = Database.coll.find({"name" : mainUser})
     mainRes = [x for x in mainRes][0]
@@ -80,12 +83,12 @@ def transfer(mainUser : str , secondaryUser : PartialUser):
          raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     secRes = [x for x in secRes][0]
 
-    if(mainRes['balance'] - int(secondaryUser.balance) < 0):
+    if(mainRes['balance'] - float(secondaryUser.balance) < 0):
         raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
     
     # print(int(secondaryUser.balance))
-    Database.coll.update_one({"name" : mainUser} , {"$set" : {"balance" : mainRes['balance']-int(secondaryUser.balance)}})
-    Database.coll.update_one({"name" : secondaryUser.name} , {"$set" : {"balance" : secRes['balance']+int(secondaryUser.balance)}})
+    Database.coll.update_one({"name" : mainUser} , {"$set" : {"balance" : mainRes['balance']-float(secondaryUser.balance)}})
+    Database.coll.update_one({"name" : secondaryUser.name} , {"$set" : {"balance" : secRes['balance']+float(secondaryUser.balance)}})
     # print(mainRes)
     raise HTTPException(status_code=status.HTTP_200_OK)
       
@@ -95,7 +98,7 @@ def addfunds(user : PartialUser):
     for result in results:
         balance = int(result["balance"])
         print(balance)
-        Database.coll.update_one({"name" : user.name} , {"$set" : {"balance" : balance+int(user.balance)}})
+        Database.coll.update_one({"name" : user.name} , {"$set" : {"balance" : balance+float(user.balance)}})
         raise HTTPException(status_code=status.HTTP_200_OK)
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 

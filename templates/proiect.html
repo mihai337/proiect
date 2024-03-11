@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>Bank Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            max-width: 400px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        h1, h2 {
+            margin: 0 0 20px;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #666;
+        }
+
+        #sectionSelect {
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+        input, button {
+            width: calc(100% - 24px);
+            padding: 12px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input:focus, button:focus {
+            border-color: #4caf50;
+        }
+
+        button {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        #sectionSelectContainer {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1;
+        }
+
+        #sectionSelect {
+            width: 200px;
+        }
+
+        #logoutButton {
+            width: 70px;
+            padding: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="balanceSection">
+        <h1>Welcome to Bank Page</h1>
+        <div id="sectionSelectContainer">
+            <label for="sectionSelect">Choose Section:</label>
+            <select id="sectionSelect" onchange="showSection()">
+                <option value="balance">View/Modify Balance</option>
+                <option value="transfer">Send Money</option>
+                <option value="addFunds">Deposit Money</option>
+            </select>
+        </div>
+
+        <div id="balanceContent">
+            <h2>View/Modify Balance</h2>
+            <p>Hello, <span id="loggedInUsername"></span>!</p>
+            <p>Your current balance is: <span id="balanceAmount">$0.00</span></p>
+            <label for="modifyAmount">Modify Balance:</label>
+            <button onclick="modifyBalance()">Update Balance</button>
+            <button onclick="checkBalance()">Check Balance</button>
+            <button onclick="logout()" id="logoutButton">Logout</button>
+        </div>
+
+        <div id="transferContent" style="display: none;">
+            <h2>Send Money</h2>
+            <label for="friend">Send to:</label>
+            <input type="text" id="friend" name="friend" placeholder="Enter recipient">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" placeholder="Enter amount">
+            <button type="button" onclick="sendMoney()">Send</button>
+        </div>
+
+        <div id="addFundsContent" style="display: none;">
+            <h2>Deposit Money</h2>
+            <label for="depositAmount">Amount:</label>
+            <input type="number" id="depositAmount" name="amount" placeholder="Enter amount">
+            <button type="button" onclick="addFunds()">Deposit</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loggedInUsername').textContent = sessionStorage.getItem("username");
+        document.getElementById('balanceAmount').textContent = "$" + sessionStorage.getItem("balance");
+
+        function showSection() {
+            var selectBox = document.getElementById("sectionSelect");
+            var selectedValue = selectBox.options[selectBox.selectedIndex].value;
+
+            document.getElementById("balanceContent").style.display = "none";
+            document.getElementById("transferContent").style.display = "none";
+            document.getElementById("addFundsContent").style.display = "none";
+
+            document.getElementById(selectedValue + "Content").style.display = "block";
+        }
+    </script>
+
+    <script>
+
+        // let currentUser = null;
+
+        function sendMoney(){
+            var f = document.getElementById("friend").value;
+            var a = document.getElementById("amount").value;
+            var username = sessionStorage.getItem("username");
+            alert(username);
+            if(f == ''){
+                alert("Do you even have friends?");
+                return;
+            }
+
+            if(a == ''){
+                alert("Do you even have money?");
+                return;
+            }
+
+            fetch('http://192.168.1.34:8000/transfer?mainUser='+username, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: f, balance: a }),
+            })
+                .then(response => {
+                    if(response.status == 404){
+                        alert("Friend not found");
+                        return;
+                    }
+                    if(response.status == 200){
+                        alert("Transfer completed");
+                    }
+
+                    if(response.status == 401){
+                        alert("Hai sa nu furam bani");
+                    }
+
+                    if(response.status == 304){
+                        alert("Nu-ti permiti boss");
+                    }
+
+                })
+                .then(data => {
+                    // Handle the response from the server
+                   
+                    // showBalanceSection();
+                    // console.log(data);
+                    // You can redirect or perform other actions based on the response
+                })
+                .catch(error => {
+                    alert("Eroare");
+                    console.error('Error:', error);
+                });
+
+        }
+
+
+        function modifyBalance() {
+            // const modifyAmount = parseFloat(document.getElementById('modifyAmount').value);
+            // if (!isNaN(modifyAmount)) {
+            //     currentUser.balance += modifyAmount;
+            //     document.getElementById('balanceAmount').textContent = `$${currentUser.balance.toFixed(2)}`;
+            // } else {
+            //     alert('Please enter a valid number to modify the balance.');
+            // }
+
+            $.post('/trans' , {username : sessionStorage.getItem("username")},function(data){
+                // $.currentUser.balance = data.balance;
+                if(data.code == '200')
+                    alert(" ");
+                document.getElementById("balanceAmount").textContent = "$" + data.modBalance;
+            } , 'json')
+        }
+
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('balanceSection').style.display = 'none';
+            document.getElementById('login-div').style.display = 'block';
+            document.getElementById('username').textContent = '';
+            document.getElementById("password").textContent='';
+
+        }
+
+        function checkBalance(){
+
+            var u = sessionStorage.getItem("username");
+
+            fetch('http://192.168.1.34:8000/get-balance', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: u }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response from the server
+                    if(data.code == 200){
+                        sessionStorage.setItem("balance" , data.balance);
+                        document.getElementById("balanceAmount").textContent = "$" + data.balance;
+                    }
+                    else{
+                        alert("Balance check failed");
+                    }
+                    // console.log(data);
+                    // You can redirect or perform other actions based on the response
+                })
+                .catch(error => {
+                    alert("Error");
+                    console.error('Error:', error);
+                });
+        }
+
+        function addFunds(){
+
+            var u = sessionStorage.getItem("username");
+            var a = document.getElementById("depositAmount").value;
+
+            fetch('http://192.168.1.34:8000/addfunds', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name: u , balance : a}),
+            })
+                .then(response => 
+                {
+                    // Handle the response from the server
+                    if(response.status == 200){
+                        // sessionStorage.setItem("balance" , data.balance);
+                        alert("Deposit successfull");
+                    }
+                    else{
+                        alert("Deposit failed");
+                    }
+                    // console.log(data);
+                    // You can redirect or perform other actions based on the response
+                })
+                .catch(error => {
+                    alert("Error");
+                    console.error('Error:', error);
+                });
+            }
+    
+    </script>
+</body>
+
+</html>
