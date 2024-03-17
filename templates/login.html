@@ -68,6 +68,8 @@
 
     <script>
 
+        const ip = 'http://192.168.1.34:8000';
+
         function login() { //asta merge
             var u = document.getElementById('username').value;
             var p = document.getElementById('password').value;
@@ -77,7 +79,7 @@
                 return;
             }
 
-            fetch('http://192.168.1.34:8000/login', {
+            fetch(ip+'/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
