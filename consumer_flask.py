@@ -64,9 +64,13 @@ def transaction():
                 return {"code" : "200" , "modBalance" : str(newbal)}
 
 
-@app.route("/index")
-def index():
-    return render_template("proiect.html")
+@app.get("/index/<data>")
+def index(data : str):
+    if data == "user":
+        return render_template("proiect.html")
+    # elif data == "fact":
+    #     return render_template("login.html")
+    
 
 @app.route("/login")
 def login():

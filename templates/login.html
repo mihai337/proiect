@@ -68,7 +68,7 @@
 
     <script>
 
-        const ip = 'http://192.168.30.23:8000';
+        const ip = 'http://192.168.1.36:8000';
 
         function login() { //asta merge
             var u = document.getElementById('username').value;
@@ -91,10 +91,9 @@
                     // Handle the response from the server
                     if(data.code == 200){
                         sessionStorage.setItem("username", u);
-                        sessionStorage.setItem("password", u);
+                        sessionStorage.setItem("password", p);
                         sessionStorage.setItem("balance", data.balance);
-                        // sessionStorage.setItem({ username: u, password : p, balance: data.balance });
-                        window.location.replace("/index");
+                        window.location.replace("/index/"+data.type);
                     }
                     else{
                         alert("Login failed");
