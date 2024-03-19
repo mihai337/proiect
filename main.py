@@ -1,6 +1,6 @@
 from fastapi import FastAPI,HTTPException,status,Form
 from fastapi.middleware.cors import CORSMiddleware
-from models import User,PartialUser
+from models import User,PartialUser,Bill
 from database import Database
 from msg_broker import Rds
 import random
@@ -44,7 +44,7 @@ def login(user : User):
                 return {"code" : "200" , "type" : "fact"}
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-@app.post("/transactions")
+@app.post("/transactions") #not working with current version of message broker
 def send(user : User):
     for i in range(5):
         value = random.randint(-20,20)
@@ -105,6 +105,18 @@ def addfunds(user : PartialUser):
         raise HTTPException(status_code=status.HTTP_200_OK)
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
+
+@app.post("/sendbill")
+def sendBill(data : Bill):
+    rqueue = Rds(data.username)
+
+    message = {
+        "factName" : data.username,
+        "amount" : data.amount
+    }
+    message = dumps(message)
+    rqueue.redis_conn.lpush(data.factName , message)
+    return HTTPException(status_code=status.HTTP_200_OK)
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app" , host="0.0.0.0" , port=8000, reload=True)

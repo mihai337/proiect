@@ -9,3 +9,8 @@ class User(BaseModel):
 class PartialUser(BaseModel):
     name : str
     balance : Optional[str] = None
+
+class Bill(BaseModel):
+    factName : str
+    username : str
+    amount : float

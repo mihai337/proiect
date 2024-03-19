@@ -27,7 +27,7 @@ def process(message):
         return {"code" : "200"}
     return {"code" : "400"}
 
-@app.post("/trans")
+@app.post("/trans") #not working with current version of message broker
 def transaction():
     username=request.form.get("username")
     password="a"
@@ -68,8 +68,8 @@ def transaction():
 def index(data : str):
     if data == "user":
         return render_template("proiect.html")
-    # elif data == "fact":
-    #     return render_template("login.html")
+    elif data == "fact":
+        return render_template("facturier.html")
     
 
 @app.route("/login")
