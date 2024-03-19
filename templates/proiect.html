@@ -31,7 +31,19 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            background-image: url('https://media.istockphoto.com/id/1492189677/photo/bank-symbol-with-with-coins-stack-concepts-of-the-banking-system-rising-interest-rates.webp?b=1&s=170667a&w=0&k=20&c=4juSl-CA3dqdm7SoZzKMkOyABsMeIeNYoNKH-0zYDsc=');
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
+            background-color: rgba(0, 0, 0, 0.5);
         }
+       
+        .top-image {
+            position: relative; 
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
 
         h1, h2 {
             margin: 0 0 20px;
@@ -41,7 +53,7 @@
         label {
             display: block;
             margin-bottom: 8px;
-            color: #666;
+            color: #000;
         }
 
         #sectionSelect {
@@ -68,11 +80,11 @@
         }
 
         input:focus, button:focus {
-            border-color: #4caf50;
+            border-color: #16811c;
         }
 
         button {
-            background-color: #4caf50;
+            background-color: #16811c;
             color: #fff;
             border: none;
             cursor: pointer;
@@ -83,6 +95,10 @@
         button:hover {
             background-color: #45a049;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:active{
+            background-color: #074a15;
         }
 
         #sectionSelectContainer {
@@ -123,6 +139,8 @@
 <body>
 
     <div class="container" id="balanceSection">
+        <button onclick="logout()" id="logoutButton">Logout</button>
+        
         <h1></h1>
         <div id="sectionSelectContainer">
             <label for="sectionSelect"></label>
@@ -140,7 +158,6 @@
             <label for="modifyAmount">Modify Balance:</label>
             <button onclick="modifyBalance()">Update Balance</button>
             <button onclick="checkBalance()">Check Balance</button>
-            <button onclick="logout()" id="logoutButton">Logout</button>
         </div>
 
         <div id="transferContent" style="display: none;">
