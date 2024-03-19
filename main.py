@@ -28,7 +28,7 @@ def sign_in(user : User):
     for result in results:
         # print("1")
         raise HTTPException(status_code=status.HTTP_302_FOUND)
-    Database.coll.insert_one({"name":user.name , "password":hash(user.password) , "balance":user.balance})
+    Database.coll.insert_one({"name":user.name , "password":hash(user.password) , "balance":user.balance , "type" : "user"})
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 
@@ -37,8 +37,11 @@ def login(user : User):
     results = Database.coll.find({"name" : user.name})
     for result in results:
         if result["password"] == hash(user.password):
-            balance = result["balance"]
-            return {"code" : "200" , "balance" : balance}
+            if result["type"] == "user":
+                balance = result["balance"]
+                return {"code" : "200" , "balance" : balance , "type" : "user"}
+            elif result["type"] == "fact":
+                return {"code" : "200" , "type" : "fact"}
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 @app.post("/transactions")
