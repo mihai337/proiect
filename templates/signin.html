@@ -9,7 +9,8 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background: rgb(42,171,81);
+            background: linear-gradient(90deg ,   rgba(42,171,81,1) 0%, rgba(5,154,20,1) 65% , rgba(2,56,38,1) 100%);
             margin: 0;
             padding: 0;
             display: flex;
@@ -85,7 +86,7 @@
                 return;
             }
 
-            fetch('http://192.168.1.38:8000/sign-in', {
+            fetch('http://192.168.50.141:8000/sign-in', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

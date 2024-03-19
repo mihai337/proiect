@@ -9,7 +9,8 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background: rgb(42,171,81);
+            background: linear-gradient(90deg ,   rgba(42,171,81,1) 0%, rgba(5,154,20,1) 65% , rgba(2,56,38,1) 100%);
             margin: 0;
             padding: 0;
             display: flex;
@@ -23,7 +24,7 @@
             background-color: #fff;
             border-radius: 8px;
             padding: 30px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4 16px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             max-width: 400px;
             width: 100%;
@@ -48,13 +49,15 @@
             padding: 12px;
             margin-bottom: 20px;
             box-sizing: border-box;
-            border: 1px solid #ccc;
+            border: 1px solid #18781c;
             border-radius: 6px;
             font-size: 16px;
+            background-color: #16811c;
+            color: #fff;
         }
 
         input, button {
-            width: calc(100% - 24px);
+            width: calc(100%- 24px);
             padding: 12px;
             margin-bottom: 20px;
             box-sizing: border-box;
@@ -73,12 +76,13 @@
             color: #fff;
             border: none;
             cursor: pointer;
+            margin-left: 35px;
             transition: background-color 0.3s;
         }
 
         button:hover {
             background-color: #45a049;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         #sectionSelectContainer {
@@ -101,15 +105,27 @@
             top: 20px;
             right: 20px;
         }
+        #logoutButton{
+            background-color: #16811c;
+            color: #fff;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        #logoutButton:hover{
+            background-color: #45a049;
+            color: #fff;
+        }
+        #logoutButton:active{
+            background-color: #074a15;
+        }
     </style>
 </head>
 
 <body>
 
     <div class="container" id="balanceSection">
-        <h1>Welcome to Bank Page</h1>
+        <h1></h1>
         <div id="sectionSelectContainer">
-            <label for="sectionSelect">Choose Section:</label>
+            <label for="sectionSelect"></label>
             <select id="sectionSelect" onchange="showSection()">
                 <option value="balance">View/Modify Balance</option>
                 <option value="transfer">Send Money</option>
@@ -163,7 +179,7 @@
     <script>
 
         // let currentUser = null;
-        const ip = 'http://192.168.30.23:8000';
+        const ip = 'http://192.168.50.141:8000';
 
         function sendMoney(){
             var f = document.getElementById("friend").value;
