@@ -57,7 +57,7 @@
             <input type="text" id="username" name="username" required>
 
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
+            <input type="password" id="password" name="password" required onkeypress="doKeyPress(event)">
 
             <button type="button" onclick="login()">Login</button>
             <p>New user? <a href="/sign-in">Register here</a></p>
@@ -69,8 +69,15 @@
 
     <script>
 
-        //const ip = 'http://192.168.1.36:8000';
-        const ip = 'http://192.168.50.141:8000';
+        const ip = 'http://192.168.1.36:8000';
+        // const ip = 'http://192.168.50.141:8000';
+
+        function doKeyPress(e) {
+            if (window.event) { e = window.event; }
+            if (e.keyCode == 13) {
+                login();
+            }
+        }
 
         function login() { //asta merge
             var u = document.getElementById('username').value;
