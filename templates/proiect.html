@@ -31,6 +31,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+
             background-image: url('https://media.istockphoto.com/id/1492189677/photo/bank-symbol-with-with-coins-stack-concepts-of-the-banking-system-rising-interest-rates.webp?b=1&s=170667a&w=0&k=20&c=4juSl-CA3dqdm7SoZzKMkOyABsMeIeNYoNKH-0zYDsc=');
             background-size: cover; 
             background-position: center; 
@@ -133,6 +134,23 @@
         #logoutButton:active{
             background-color: #074a15;
         }
+        
+        #taxesSection {
+            display: none;
+        }
+
+        #taxesList {
+            padding-left: 20px;
+        }
+        #taxesContent {
+            background-color: #fff;
+            background-image: "C:\Users\PC\Pictures\Screenshots";
+            height: 300px; 
+            overflow-y: auto;
+            
+        }
+        
+       
     </style>
 </head>
 
@@ -148,6 +166,7 @@
                 <option value="balance">View/Modify Balance</option>
                 <option value="transfer">Send Money</option>
                 <option value="addFunds">Deposit Money</option>
+                <option value="taxes">Taxes</option>
             </select>
         </div>
 
@@ -176,23 +195,90 @@
             <button type="button" onclick="addFunds()">Deposit</button>
         </div>
     </div>
+    
 
+    <div id="taxesContent" style="display: none;">
+        <h1>Taxes Page</h1>
+        <div id="taxesList">
+            <h2>List of Taxes</h2>
+            <ul id="taxesItems"></ul>
+        </div>
+    </div>
     <script>
-        document.getElementById('loggedInUsername').textContent = sessionStorage.getItem("username");
-        document.getElementById('balanceAmount').textContent = "$" + sessionStorage.getItem("balance");
-
-        function showSection() {
-            var selectBox = document.getElementById("sectionSelect");
-            var selectedValue = selectBox.options[selectBox.selectedIndex].value;
-
-            document.getElementById("balanceContent").style.display = "none";
-            document.getElementById("transferContent").style.display = "none";
-            document.getElementById("addFundsContent").style.display = "none";
-
-            document.getElementById(selectedValue + "Content").style.display = "block";
-        }
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("Script loaded!"); // Check if the script is loaded
+        
+            const currentPage = window.location.pathname;
+            console.log("Current page:", currentPage); // Check the current page URL
+        
+            if (currentPage.includes("taxes")) {
+                console.log("On taxes page");
+                const balanceSection = document.getElementById("balanceSection");
+                console.log("Balance section:", balanceSection); // Check if balanceSection is correctly selected
+        
+                if (balanceSection) {
+                    balanceSection.style.display = "none";
+                    console.log("Balance section hidden");
+                }
+            }
+        }); 
     </script>
 
+    <script>
+        const taxesData = [
+            { "name": "John Doe", "amount": 100 },
+            { "name": "Jane Smith", "amount": 150 },
+            { "name": "Mike Johnson", "amount": 80 },
+            { "name": "Emily Brown", "amount": 120 },
+            { "name": "David Wilson", "amount": 90 },
+            { "name": "Sarah Miller", "amount": 110 },
+            { "name": "Michael Davis", "amount": 95 },
+            { "name": "Jennifer Garcia", "amount": 135 },
+            { "name": "Robert Martinez", "amount": 70 },
+            { "name": "Linda Hernandez", "amount": 125 },
+   
+        ];
+    
+        function populateTaxes() {
+            const taxesList = document.getElementById("taxesItems");
+            taxesList.innerHTML = "";
+    
+            taxesData.forEach(person => {
+                const listItem = document.createElement("li");
+                listItem.textContent = `${person.name}: $${person.amount.toFixed(2)}`;
+                taxesList.appendChild(listItem);
+            });
+        }
+    
+        function showSection() {
+            const selectBox = document.getElementById("sectionSelect");
+            const selectedValue = selectBox.options[selectBox.selectedIndex].value;
+    
+            const sections = ["balance", "transfer", "addFunds", "taxes"]; 
+    
+            sections.forEach(sectionId => {
+                const sectionElement = document.getElementById(sectionId + "Content"); // Updated ID to match HTML
+                if (sectionElement) {
+                    if (sectionId === selectedValue) {
+                        sectionElement.style.display = "block";
+                    } else {
+                        sectionElement.style.display = "none";
+                    }
+                } else {
+                    console.error("Element not found:", sectionId + "Content");
+                }
+            });
+    
+            if (selectedValue === "taxes") {
+                //document.getElementById("").style.display= "none";
+                populateTaxes();
+                document.getElementById("taxesContent").style.display = "block"; 
+            }
+        }
+    
+        window.onload = showSection;
+    </script>
+    
     <script>
 
         // let currentUser = null;
