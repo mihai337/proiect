@@ -68,13 +68,13 @@
 
     <script>
 
-        const ip = 'http://192.168.1.36:8000';
-        //const ip = 'http://192.168.50.141:8000';
+        // const ip = 'http://192.168.1.36:8000';
+        const ip = 'http://192.168.1.102:8000';
 
         function sendBill() {
-            var f = document.getElementById('sendTo').value;
+            var u = document.getElementById('sendTo').value;
             var a = document.getElementById('amount').value;
-            var u = sessionStorage.getItem("username");
+            var f = sessionStorage.getItem("username");
 
             if(u == '' || a == ''){
                 alert("Completati toate campurile");
@@ -86,7 +86,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ factName: u, username: u , amount : a }),
+                body: JSON.stringify({ factName: f, username: u , amount : a }),
             })
                 .then(response => {
                     if(response.status == 200)
