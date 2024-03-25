@@ -4,7 +4,7 @@ from models import User,PartialUser,Bill
 from database import Database
 from msg_broker import Rds
 import random
-from json import dumps
+from json import dumps,loads
 import uvicorn
 from hasher import hash
 
@@ -60,7 +60,7 @@ def send(user : User):
             Rds.redis_conn.lpush("mod_queue" , mjson)
 
 
-@app.post("/get-balance")
+@app.post("/get-balance") #ar trebui sa o fac get
 def get_balance(user : PartialUser):
     results = Database.coll.find({"name" : user.name})
     for result in results:
@@ -108,15 +108,37 @@ def addfunds(user : PartialUser):
 
 @app.post("/sendbill")
 def sendBill(data : Bill):
+    #check is username in database
     rqueue = Rds(data.username)
-
+    uid = random.randint(0,1000000)
     message = {
-        "factName" : data.username,
-        "amount" : data.amount
+        "factName" : data.factName,
+        "amount" : data.amount,
+        "uid":uid
     }
     message = dumps(message)
-    rqueue.redis_conn.lpush(data.factName , message)
+    print(message)
+    rqueue.redis_conn.lpush(data.username , message)
     return HTTPException(status_code=status.HTTP_200_OK)
+
+
+@app.get("/getbills/{name}")
+def getbills(name):
+    first=True
+    rq = Rds(name=name)
+    message = rq.redis_conn.rpop(name=name)
+    init_msg = message
+    data=[]
+    while message != None and (message != init_msg or first):
+        rq.redis_conn.lpush(name , message)
+        message = loads(message)
+        data.append(message)
+        message = rq.redis_conn.rpop(name=name)
+        first = False
+    rq.redis_conn.lpush(name , message)
+    return data
+
+
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app" , host="0.0.0.0" , port=8000, reload=True)

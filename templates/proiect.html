@@ -224,7 +224,11 @@
         }); 
     </script>
 
-    <script>
+    <script> //aici avem lista de facturieri
+
+        document.getElementById('loggedInUsername').textContent = sessionStorage.getItem("username");
+        document.getElementById('balanceAmount').textContent = "$" + sessionStorage.getItem("balance");
+
         const taxesData = [
             { "name": "John Doe", "amount": 100 },
             { "name": "Jane Smith", "amount": 150 },
@@ -243,11 +247,21 @@
             const taxesList = document.getElementById("taxesItems");
             taxesList.innerHTML = "";
     
-            taxesData.forEach(person => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `${person.name}: $${person.amount.toFixed(2)}`;
-                taxesList.appendChild(listItem);
-            });
+            fetch(ip+"/getbills/" + sessionStorage.getItem("username"))
+                .then(response => response.json())
+                .then((data) =>{
+                    data.forEach(person => {
+                        const listItem = document.createElement("li");
+                        listItem.textContent = `${person.factName}: $${person.amount.toFixed(2)}`;
+                        taxesList.appendChild(listItem);
+                     });
+                });
+
+            // taxesData.forEach(person => {
+            //     const listItem = document.createElement("li");
+            //     listItem.textContent = `${person.name}: $${person.amount.toFixed(2)}`;
+            //     taxesList.appendChild(listItem);
+            // });
         }
     
         function showSection() {
@@ -282,7 +296,8 @@
     <script>
 
         // let currentUser = null;
-        const ip = 'http://192.168.1.36:8000';
+        // const ip = 'http://192.168.1.36:8000';
+        const ip = 'http://192.168.1.102:8000';
 
         function sendMoney(){
             var f = document.getElementById("friend").value;
