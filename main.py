@@ -117,7 +117,7 @@ def sendBill(data : Bill):
         "uid":uid
     }
     message = dumps(message)
-    print(message)
+    # print(message)
     rqueue.redis_conn.lpush(data.username , message)
     return HTTPException(status_code=status.HTTP_200_OK)
 
@@ -137,6 +137,7 @@ def getbills(name):
         first = False
     rq.redis_conn.lpush(name , message)
     return data
+
 
 
 
