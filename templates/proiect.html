@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/static/script.js"></script>
     <title>Bank Page</title>
     <style>
         body {
@@ -148,9 +149,7 @@
             height: 300px; 
             overflow-y: auto;
             
-        }
-        
-       
+        }   
     </style>
 </head>
 
@@ -204,6 +203,7 @@
             <ul id="taxesItems"></ul>
         </div>
     </div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             console.log("Script loaded!"); // Check if the script is loaded
@@ -243,206 +243,7 @@
    
         ];
     
-        function populateTaxes() {
-            const taxesList = document.getElementById("taxesItems");
-            taxesList.innerHTML = "";
-    
-            fetch(ip+"/getbills/" + sessionStorage.getItem("username"))
-                .then(response => response.json())
-                .then((data) =>{
-                    data.forEach(person => {
-                        const listItem = document.createElement("li");
-                        listItem.textContent = `${person.factName}: $${person.amount.toFixed(2)}`;
-                        taxesList.appendChild(listItem);
-                     });
-                });
-
-                
-            // taxesData.forEach(person => {
-            //     const listItem = document.createElement("li");
-            //     listItem.textContent = `${person.name}: $${person.amount.toFixed(2)}`;
-            //     taxesList.appendChild(listItem);
-            // });
-        }
-    
-        function showSection() {
-            const selectBox = document.getElementById("sectionSelect");
-            const selectedValue = selectBox.options[selectBox.selectedIndex].value;
-    
-            const sections = ["balance", "transfer", "addFunds", "taxes"]; 
-    
-            sections.forEach(sectionId => {
-                const sectionElement = document.getElementById(sectionId + "Content"); // Updated ID to match HTML
-                if (sectionElement) {
-                    if (sectionId === selectedValue) {
-                        sectionElement.style.display = "block";
-                    } else {
-                        sectionElement.style.display = "none";
-                    }
-                } else {
-                    console.error("Element not found:", sectionId + "Content");
-                }
-            });
-    
-            if (selectedValue === "taxes") {
-                //document.getElementById("").style.display= "none";
-                populateTaxes();
-                document.getElementById("taxesContent").style.display = "block"; 
-            }
-        }
-    
         window.onload = showSection;
-    </script>
-    
-    <script>
-
-        // let currentUser = null;
-        // const ip = 'http://192.168.1.36:8000';
-        const ip = 'http://127.0.0.1:8000';
-
-        function sendMoney(){
-            var f = document.getElementById("friend").value;
-            var a = document.getElementById("amount").value;
-            var username = sessionStorage.getItem("username");
-            alert(username);
-            if(f == ''){
-                alert("Do you even have friends?");
-                return;
-            }
-
-            if(a == ''){
-                alert("Do you even have money?");
-                return;
-            }
-
-            fetch(ip+'/transfer?mainUser='+username, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: f, balance: a }),
-            })
-                .then(response => {
-                    if(response.status == 404){
-                        alert("Friend not found");
-                        return;
-                    }
-                    if(response.status == 200){
-                        alert("Transfer completed");
-                    }
-
-                    if(response.status == 401){
-                        alert("Hai sa nu furam bani");
-                    }
-
-                    if(response.status == 304){
-                        alert("Nu-ti permiti boss");
-                    }
-
-                })
-                .then(data => {
-                    // Handle the response from the server
-                   
-                    // showBalanceSection();
-                    // console.log(data);
-                    // You can redirect or perform other actions based on the response
-                })
-                .catch(error => {
-                    alert("Eroare");
-                    console.error('Error:', error);
-                });
-
-        }
-
-
-        function modifyBalance() {
-            // const modifyAmount = parseFloat(document.getElementById('modifyAmount').value);
-            // if (!isNaN(modifyAmount)) {
-            //     currentUser.balance += modifyAmount;
-            //     document.getElementById('balanceAmount').textContent = `$${currentUser.balance.toFixed(2)}`;
-            // } else {
-            //     alert('Please enter a valid number to modify the balance.');
-            // }
-
-            $.post('/trans' , {username : sessionStorage.getItem("username")},function(data){
-                // $.currentUser.balance = data.balance;
-                if(data.code == '200')
-                    alert(" ");
-                document.getElementById("balanceAmount").textContent = "$" + data.modBalance;
-            } , 'json')
-        }
-
-
-        function logout() {
-            currentUser = null;
-            document.getElementById('balanceSection').style.display = 'none';
-            document.getElementById('login-div').style.display = 'block';
-            document.getElementById('username').textContent = '';
-            document.getElementById("password").textContent='';
-
-        }
-
-        function checkBalance(){
-
-            var u = sessionStorage.getItem("username");
-
-            fetch(ip+'/get-balance', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: u }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    // Handle the response from the server
-                    if(data.code == 200){
-                        sessionStorage.setItem("balance" , data.balance);
-                        document.getElementById("balanceAmount").textContent = "$" + data.balance;
-                    }
-                    else{
-                        alert("Balance check failed");
-                    }
-                    // console.log(data);
-                    // You can redirect or perform other actions based on the response
-                })
-                .catch(error => {
-                    alert("Error");
-                    console.error('Error:', error);
-                });
-        }
-
-        function addFunds(){
-
-            var u = sessionStorage.getItem("username");
-            var a = document.getElementById("depositAmount").value;
-
-            fetch(ip+'/addfunds', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: u , balance : a}),
-            })
-                .then(response => 
-                {
-                    // Handle the response from the server
-                    if(response.status == 200){
-                        // sessionStorage.setItem("balance" , data.balance);
-                        alert("Deposit successfull");
-                    }
-                    else{
-                        alert("Deposit failed");
-                    }
-                    // console.log(data);
-                    // You can redirect or perform other actions based on the response
-                })
-                .catch(error => {
-                    alert("Error");
-                    console.error('Error:', error);
-                });
-            }
-    
     </script>
 </body>
 

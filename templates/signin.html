@@ -16,7 +16,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background: url('pozika.jpg') no-repeat;
+            background: url('/static/pozika.jpg') no-repeat;
             background-size: cover;
             background-position: center;
             color: #fff;
@@ -24,7 +24,7 @@
 
         .signin-container {
             background: transparent;
-            border 2px solid rgba(255,255,255,.2);
+            border: 2px solid rgba(255,255,255,.2);
             backdrop-filter: blur(20px);
             padding: 30px 40px;
             width: 275px;
@@ -55,7 +55,7 @@
             position: relative;
             outline: none;
             border-radius: 40px;
-            border: 2px solid rgba(255,255,255, .2)
+            border: 2px solid rgba(255,255,255, .2);
             font-size: 16 px;
             position: relative;
         }
@@ -139,44 +139,6 @@
             document.getElementById('username').style.paddingRight = iconWidth + 20 + 'px'; 
             document.getElementById('password').style.paddingRight = iconWidth + 20 + 'px';
             document.getElementById('re-password').style.paddingRight = iconWidth + 20 + 'px';
-        }
-
-        function signin() { //si asta merge
-            var u = document.getElementById('new-username').value;
-            var p = document.getElementById('new-password').value;
-            var rp = document.getElementById('re-password').value;
-
-            if (u == '' || p == '' || rp == '') {
-                alert('Completaţi toate câmpurile');
-                return;
-            }
-
-            if(p != rp){
-                alert("Passwords don't match");
-                return;
-            }
-
-            fetch('http://192.168.1.36:8000/sign-in', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: u, password: p }),
-            })
-                .then(response => {
-                    if(response.status == 200){
-                        alert("Sign in successfully, please log in");
-                        window.location.replace("/login");
-                    }
-                    else{
-                        alert("Sign in failed");
-                    }
-
-                })
-                .catch(error => {
-                    alert("Sign in failed");
-                    console.error('Error:', error);
-                });
         }
 
     </script>

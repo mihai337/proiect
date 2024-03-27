@@ -14,7 +14,7 @@ log = False
 NO_OF_TRIES = 3
 
 app = Flask(__name__ )
-root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates", "scripts")
+root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 
 def process(message):
     results = Database.coll.find({"name" : message["name"]})
@@ -79,12 +79,7 @@ def login():
 @app.route("/sign-in")
 def sign_in():
     return render_template("signin.html")
-
-@app.route("/scripts")
-def getScript():
-    return send_from_directory(root,"script.js")
     
-
 @app.route("/")
 def home():
     return render_template("welcome.html")

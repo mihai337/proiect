@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/static//script.js"></script>
     <title>Bank Page</title>
     <style>
         body {
@@ -51,7 +52,7 @@
 
 <body>
     <div class="fact-container" id="login-div" style="display: block;">
-        <h2>Login</h2>
+        <h2>Send Bill</h2>
         <form id="loginForm">
             <label for="sendTo">Send To:</label>
             <input type="text" id="sendTo" name="sendTo" required>
@@ -63,46 +64,6 @@
         </form>
 
     </div>
-
-    <script src="/scripts"></script>
-
-    <script>
-
-        // const ip = 'http://192.168.1.36:8000';
-        const ip = 'http://127.0.0.1:8000';
-
-        function sendBill() {
-            var u = document.getElementById('sendTo').value;
-            var a = document.getElementById('amount').value;
-            var f = sessionStorage.getItem("username");
-
-            if(u == '' || a == ''){
-                alert("Completati toate campurile");
-                return;
-            }
-
-            fetch(ip+'/sendbill', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ factName: f, username: u , amount : a }),
-            })
-                .then(response => {
-                    if(response.status == 200)
-                        alert("Bill sent");
-                    else{
-                        alert("Bill failed to send");
-                    }
-                })
-                
-                .catch(error => {
-                    alert("Billing failed");
-                    console.error('Error:', error);
-                });
-        }
-
-    </script>
 </body>
 
 </html>

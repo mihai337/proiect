@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/static/script.js"></script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <title>Bank Page</title>
     <style>
@@ -18,7 +19,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background: url('pozika.jpg') no-repeat;
+            background: url('/static/pozika.jpg') no-repeat;
             background-size: cover;
             background-position: center;
             color: #fff;
@@ -26,7 +27,7 @@
 
         .login-container {
             background: transparent;
-            border 2px solid rgba(255,255,255,.2);
+            border: 2px solid rgba(255,255,255,.2);
             backdrop-filter: blur(20px);
             padding: 30px 40px;
             width: 275px;
@@ -58,7 +59,7 @@
             position: relative;
             outline: none;
             border-radius: 40px;
-            border: 2px solid rgba(255,255,255, .2)
+            border: 2px solid rgba(255,255,255, .2);
             font-size: 16 px;
             position: relative;
             
@@ -124,8 +125,6 @@
         </form>
     </div>
 
-    <script src="/scripts"></script>
-
     <script>
 
         const usernameIcon = document.getElementById('username-icon');
@@ -139,54 +138,6 @@
             const iconWidth = usernameIcon.offsetWidth; 
             document.getElementById('username').style.paddingRight = iconWidth + 20 + 'px'; // Adjust padding-right
             document.getElementById('password').style.paddingRight = iconWidth + 20 + 'px'; // Adjust padding-right
-        }
-
-        // const ip = 'http://192.168.1.36:8000';
-        const ip = 'http://127.0.0.1:8000';
-
-        function doKeyPress(e) {
-            if (window.event) { e = window.event; }
-            if (e.keyCode == 13) {
-                login();
-            }
-        }
-
-        function login() { //asta merge
-            var u = document.getElementById('username').value;
-            var p = document.getElementById('password').value;
-
-            if(u == '' || p == ''){
-                alert("Completati toate campurile");
-                return;
-            }
-
-            fetch(ip+'/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: u, password: p }),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    // Handle the response from the server
-                    if(data.code == 200){
-                        sessionStorage.setItem("username", u);
-                        sessionStorage.setItem("password", p);
-                        sessionStorage.setItem("balance", data.balance);
-                        window.location.replace("/index/"+data.type);
-                    }
-                    else{
-                        alert("Login failed");
-                    }
-                    // showBalanceSection();
-                    // console.log(data);
-                    // You can redirect or perform other actions based on the response
-                })
-                .catch(error => {
-                    alert("Login failed");
-                    console.error('Error:', error);
-                });
         }
 
     </script>
