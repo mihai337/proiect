@@ -6,21 +6,27 @@
   <title>Welcome to MyBank App</title>
   <style>
     body {
-      font-family: 'Arial', sans-serif;
-      background: rgb(42,171,81);
-      background: radial-gradient(circle, rgba(230,238,158,1) 0%, rgba(243,183,210,1) 100%);
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background-color: #f5f5f5;
+      display: flex;
+      align-items: top;
+      justify-content: center;
+      min-height: 100vh;
+      background: url('pozika.jpg') no-repeat;
+      background-size: cover;
+      background-position: center;
+      color: #fff;
     }
 
     .welcome-container {
       text-align: center;
-      padding: 100px 20px;
+      padding: 50px 20px;
     }
 
     h1 {
       color: #fff;
+      font-size: 40px;
     }
 
     p {
@@ -29,24 +35,27 @@
       margin-top: 20px;
     }
 
-    .btn {
-      display: inline-block;
-      padding: 15px 30px;
-      font-size: 18px;
-      text-align: center;
-      text-decoration: none;
-      background-color: #16811c;
-      color: #fff;
-      border-radius: 5px;
-      transition: background-color 0.3s ease;
+    btn-container {
+      align-self: flex-end; /* Aligns container to the flex-end (right corner) */
+      margin-top: auto; /* Pushes the container to the bottom of the screen */
     }
 
-    .btn:hover {
-      background-color: #45a049;
+    .btn {
+      display: inline-block;
+      padding: 10px 15px;
+      font-size: 15px;
+      text-align: center;
+      text-decoration: none;
+      background-color: #fff;
+      color: #333;
+      border-radius: 40px;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 0 10px rgba(0,0,0,.1);
+      position: absolute;
+      top: 20px;
+      right: 20px;
     }
-    .btn:active{
-      background-color: #074a15;
-    }
+
   </style>
 </head>
 <body>
