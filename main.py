@@ -112,6 +112,7 @@ def sendBill(data : Bill):
     rqueue = Rds(data.username)
     uid = random.randint(0,1000000)
     message = {
+        "username" : data.username,
         "factName" : data.factName,
         "amount" : data.amount,
         "uid":uid
@@ -119,7 +120,7 @@ def sendBill(data : Bill):
     message = dumps(message)
     # print(message)
     rqueue.redis_conn.lpush(data.username , message)
-    return HTTPException(status_code=status.HTTP_200_OK)
+    raise HTTPException(status_code=status.HTTP_200_OK)
 
 
 @app.get("/getbills/{name}")
@@ -138,8 +139,21 @@ def getbills(name):
     rq.redis_conn.lpush(name , message)
     return data
 
-
-
+@app.get("/paybill/{name}/{uid}") #vedem daca merge
+def paybill(name ,uid):
+    rq = Rds(name=name)
+    message = rq.redis_conn.rpop(name=name)
+    while message['uid'] != uid:
+        rq.redis_conn.lpush(name , message)
+        message = rq.redis_conn.rpop(name=name)
+    results = Database.coll.find({"name" : message['username']})
+    for result in results:
+        fact = {
+            "name":message['factName'],
+            "bakance":message['amount']
+        }
+        transfer(message['username'] , fact)
+    raise HTTPException(status_code=status.HTTP_424_FAILED_DEPENDENCY)
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app" , host="0.0.0.0" , port=8000, reload=True)

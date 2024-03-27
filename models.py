@@ -4,6 +4,7 @@ from typing import Optional
 class User(BaseModel):
     name : str
     password : str
+    type : Optional[str] = None
     balance : Optional[float] = 0
 
 class PartialUser(BaseModel):
