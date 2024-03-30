@@ -135,30 +135,52 @@
         #logoutButton:active{
             background-color: #074a15;
         }
-        
-        #taxesSection {
-            display: none;
+
+       
+        #taxesContent {
+            background-color: #fff;
+            width: 400px;
+            height: 300px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #taxesContent h1 {
+            ustify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #333;
         }
 
         #taxesList {
             padding-left: 20px;
+            margin-top: 20px;
+            max-width: 400px;
+            width: 100%;
         }
-        #taxesContent {
-            background-color: #fff;
-            background-image: "C:\Users\PC\Pictures\Screenshots";
-            height: 300px; 
-            overflow-y: auto;
-            
-        }   
+
+        #taxesItems {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #taxesItems li {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        #taxesContent  .container{
+            display: none !important;
+        }
+  
     </style>
 </head>
 
 <body>
 
-    <div class="container" id="balanceSection">
-        <button onclick="logout()" id="logoutButton">Logout</button>
-        
-        <h1></h1>
+    <header>
         <div id="sectionSelectContainer">
             <label for="sectionSelect"></label>
             <select id="sectionSelect" onchange="showSection()">
@@ -168,7 +190,11 @@
                 <option value="taxes">Taxes</option>
             </select>
         </div>
+        <button onclick="logout()" id="logoutButton">Logout</button>
+    </header>
 
+    <div class="container" id="balanceSection">
+        <h1></h1>
         <div id="balanceContent">
             <h2>View/Modify Balance</h2>
             <p>Hello, <span id="loggedInUsername"></span>!</p>
@@ -203,26 +229,7 @@
             <ul id="taxesItems"></ul>
         </div>
     </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            console.log("Script loaded!"); // Check if the script is loaded
-        
-            const currentPage = window.location.pathname;
-            console.log("Current page:", currentPage); // Check the current page URL
-        
-            if (currentPage.includes("taxes")) {
-                console.log("On taxes page");
-                const balanceSection = document.getElementById("balanceSection");
-                console.log("Balance section:", balanceSection); // Check if balanceSection is correctly selected
-        
-                if (balanceSection) {
-                    balanceSection.style.display = "none";
-                    console.log("Balance section hidden");
-                }
-            }
-        }); 
-    </script>
+    
 
     <script> //aici avem lista de facturieri
 

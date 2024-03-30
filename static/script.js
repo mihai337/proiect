@@ -1,6 +1,6 @@
 
-// const ip = "http://192.168.1.105:8000";
-const ip = 'http://127.0.0.1:8000';
+ const ip = "http://192.168.1.234:8000";
+//const ip = 'http://127.0.0.1:8000';
 
 
 function logout() {
@@ -260,22 +260,58 @@ function populateTaxes() {
     const taxesList = document.getElementById("taxesItems");
     taxesList.innerHTML = "";
 
+    document.getElementById('loggedInUsername').textContent = sessionStorage.getItem("username");
+        document.getElementById('balanceAmount').textContent = "$" + sessionStorage.getItem("balance");
+
+        const taxesData = [
+            { "name": "John Doe", "amount": 100 },
+            { "name": "Jane Smith", "amount": 150 },
+            { "name": "Mike Johnson", "amount": 80 },
+            { "name": "Emily Brown", "amount": 120 },
+            { "name": "David Wilson", "amount": 90 },
+            { "name": "Sarah Miller", "amount": 110 },
+            { "name": "Michael Davis", "amount": 95 },
+            { "name": "Jennifer Garcia", "amount": 135 },
+            { "name": "Robert Martinez", "amount": 70 },
+            { "name": "Linda Hernandez", "amount": 125 },
+   
+        ];
+
     fetch(ip+"/getbills/" + sessionStorage.getItem("username"))
         .then(response => response.json())
         .then((data) =>{
             data.forEach(person => {
                 const listItem = document.createElement("li");
                 listItem.textContent = `${person.factName}: $${person.amount.toFixed(2)}`;
+                const payButton = document.createElement("button");
+                payButton.textContent = "Pay";
+                payButton.onclick = function () {
+                    console.log(`Paying ${person.name}`);
+                
+                };
+    
+                listItem.appendChild(payButton);
                 taxesList.appendChild(listItem);
-             });
+            });
         });
+        // taxesData.forEach(person => {
+        //     const listItem = document.createElement("li");
+        //     listItem.textContent = `${person.name}: $${person.amount.toFixed(2)}`;
+    
+        //     const payButton = document.createElement("button");
+        //     payButton.textContent = "Pay";
+        //     payButton.onclick = function () {
+        //         console.log(`Paying ${person.name}`);
+        //         // Add payment logic or redirection here
+        //     };
+    
+        //     listItem.appendChild(payButton);
+        //     taxesList.appendChild(listItem);
+        // });
+
 
         
-    // taxesData.forEach(person => {
-    //     const listItem = document.createElement("li");
-    //     listItem.textContent = `${person.name}: $${person.amount.toFixed(2)}`;
-    //     taxesList.appendChild(listItem);
-    // });
+    
 }
 
 function showSection() {
@@ -298,8 +334,12 @@ function showSection() {
     });
 
     if (selectedValue === "taxes") {
-        //document.getElementById("").style.display= "none";
         populateTaxes();
         document.getElementById("taxesContent").style.display = "block"; 
+        document.getElementById("balanceSection").style.display="none";
     }
+    else {
+        document.getElementById("balanceSection").style.display = "block";
+    }
+    
 }
