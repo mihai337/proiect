@@ -1,5 +1,5 @@
 
- const ip = "http://192.168.1.234:8000";
+ const ip = "http://192.168.1.109:8000";
 //const ip = 'http://127.0.0.1:8000';
 
 
@@ -173,7 +173,7 @@ function sendBill() {
         });
 }
 
-function signin() { //si asta merge
+function signin() { //adauga user type cu drop down menu
     var u = document.getElementById('new-username').value;
     var p = document.getElementById('new-password').value;
     var rp = document.getElementById('re-password').value;
@@ -218,7 +218,7 @@ function doKeyPress(e) {
     }
 }
 
-function login() { //asta merge
+function login() {
     var u = document.getElementById('username').value;
     var p = document.getElementById('password').value;
 
@@ -256,6 +256,25 @@ function login() { //asta merge
         });
 }
 
+function payBill(name,uid){ //make the bill disappear
+    fetch(ip+'/paybill/'+name+'/'+uid)
+        .then(response => {
+            if(response.status == 200){
+                alert("Bill paid");
+                //make the bill disappear
+            }
+            else{
+                alert("Bill failed to pay");
+            }
+        })
+        
+        .catch(error => {
+            alert("Billing failed");
+            console.error('Error:', error);
+        });
+}
+
+
 function populateTaxes() {
     const taxesList = document.getElementById("taxesItems");
     taxesList.innerHTML = "";
@@ -286,8 +305,8 @@ function populateTaxes() {
                 const payButton = document.createElement("button");
                 payButton.textContent = "Pay";
                 payButton.onclick = function () {
-                    console.log(`Paying ${person.name}`);
-                
+                    payBill(person.username,person.uid);
+                    console.log(person.username);
                 };
     
                 listItem.appendChild(payButton);

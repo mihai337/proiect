@@ -136,24 +136,47 @@ def getbills(name):
         data.append(message)
         message = rq.redis_conn.rpop(name=name)
         first = False
+
+    if data == []:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND) #handeling the case when the bill is not found
+    
     rq.redis_conn.lpush(name , message)
     return data
 
-@app.get("/paybill/{name}/{uid}") #vedem daca merge
+@app.get("/paybill/{name}/{uid}")
 def paybill(name ,uid):
     rq = Rds(name=name)
     message = rq.redis_conn.rpop(name=name)
-    while message['uid'] != uid:
+    message = loads(message.decode("ASCII"))
+    uid = int(uid)
+    init_uid = message['uid']
+
+    while message['uid'] != uid and message != None:
+        message = dumps(message)
         rq.redis_conn.lpush(name , message)
         message = rq.redis_conn.rpop(name=name)
-    results = Database.coll.find({"name" : message['username']})
-    for result in results:
-        fact = {
-            "name":message['factName'],
-            "bakance":message['amount']
-        }
-        transfer(message['username'] , fact)
-    raise HTTPException(status_code=status.HTTP_424_FAILED_DEPENDENCY)
+        message = loads(message.decode("ASCII"))
+        if init_uid == message['uid']:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND) #handeling the case when the bill is not found
+
+
+    result = Database.coll.find({"name" : name})
+    result = [x for x in result][0]
+    result_fact = Database.coll.find({"name" : message['factName']})
+    result_fact = [x for x in result_fact][0]
+    if result is None or result_fact is None:
+        rq.redis_conn.lpush(name , dumps(message))
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+
+    if result['balance'] - float(message['amount']) < 0:
+        rq.redis_conn.lpush(name , dumps(message))
+        raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED) #handeling the case when the user does not have enough money
+
+    Database.coll.update_one({"name" : name} , {"$set" : {"balance" : result['balance']-float(message['amount'])}})
+    Database.coll.update_one({"name" : message['factName']} , {"$set" : {"balance" : result_fact['balance']+float(message['amount'])}})
+    raise HTTPException(status_code=status.HTTP_200_OK)
+
 
 if __name__ == "__main__":
     uvicorn.run(app="main:app" , host="0.0.0.0" , port=8000, reload=True)
