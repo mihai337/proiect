@@ -1,6 +1,6 @@
 
- const ip = "http://192.168.1.109:8000";
-//const ip = 'http://127.0.0.1:8000';
+//  const ip = "http://192.168.1.109:8000";
+const ip = 'http://127.0.0.1:8000';
 
 
 function logout() {
@@ -260,8 +260,7 @@ function payBill(name,uid){ //make the bill disappear
     fetch(ip+'/paybill/'+name+'/'+uid)
         .then(response => {
             if(response.status == 200){
-                alert("Bill paid");
-                //make the bill disappear
+                alert("Bill paid");    
             }
             else{
                 alert("Bill failed to pay");

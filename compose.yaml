@@ -1,0 +1,35 @@
+name: "proiect_2"
+services:
+  backend:
+      build:
+        dockerfile: Dockerfile.backend
+        context: .
+      ports:
+        - "8000:8000"
+      depends_on:
+        - db
+        - redis
+
+  frontend:
+      build:
+        dockerfile: Dockerfile.frontend
+        context: .
+      ports:
+        - "5000:5000"
+
+  db:
+      image: "mongo:latest"
+      ports:
+        - "27017:27017"
+      volumes:
+        - 0feeca61b26d2e513a49b20d3fc40cb6c9bebd9db36e78fb3904828a6e2845fe:/data/db
+        - 0feeca61b26d2e513a49b20d3fc40cb6c9bebd9db36e78fb3904828a6e2845fe:/data/configdb
+
+  redis:
+      image: "redis:latest"
+      ports:
+        - "6379:6379"
+  
+volumes:
+  0feeca61b26d2e513a49b20d3fc40cb6c9bebd9db36e78fb3904828a6e2845fe:
+    external: true
