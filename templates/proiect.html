@@ -174,6 +174,44 @@
         #taxesContent  .container{
             display: none !important;
         }
+
+        #historyContent {
+            background-color: #fff;
+            width: 400px;
+            height: 300px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        #historyContent h1 {
+            ustify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        #historyList {
+            padding-left: 20px;
+            margin-top: 20px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        #historyItems {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #historyItems li {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        #historyContent  .container{
+            display: none !important;
+        }
   
     </style>
 </head>
@@ -188,6 +226,7 @@
                 <option value="transfer">Send Money</option>
                 <option value="addFunds">Deposit Money</option>
                 <option value="taxes">Taxes</option>
+                <option value="history">View History</option>
             </select>
         </div>
         <button onclick="logout()" id="logoutButton">Logout</button>
@@ -229,6 +268,15 @@
             <ul id="taxesItems"></ul>
         </div>
     </div>
+
+    <div id="historyContent" style ="display: none">
+        <hi>History</hi>
+        <div id"historyList">
+            <h2>All payments</h2>
+            <ul id="historyItems"></ul>
+        </div>
+    </div>
+
     
 
     <script> //aici avem lista de facturieri

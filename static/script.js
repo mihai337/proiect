@@ -314,11 +314,30 @@ function populateTaxes() {
     
 }
 
+
+function populateHistory() {
+    const historyList = document.getElementById("historyItems");
+    historyList.innerHTML = "";
+
+    fetch(ip + "/gethistory/" + sessionStorage.getItem("username"))
+        .then(response => response.json())
+        .then((data) => {
+            data.forEach(transaction => {
+                const listItem = document.createElement("li");
+                listItem.textContent = `${transaction.date}: ${transaction.description} - $${transaction.amount.toFixed(2)}`;
+                historyList.appendChild(listItem);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching transaction data:', error);
+        });
+}
+
 function showSection() {
     const selectBox = document.getElementById("sectionSelect");
     const selectedValue = selectBox.options[selectBox.selectedIndex].value;
 
-    const sections = ["balance", "transfer", "addFunds", "taxes"]; 
+    const sections = ["balance", "transfer", "addFunds", "taxes","history"]; 
 
     sections.forEach(sectionId => {
         const sectionElement = document.getElementById(sectionId + "Content"); // Updated ID to match HTML
@@ -336,6 +355,10 @@ function showSection() {
     if (selectedValue === "taxes") {
         populateTaxes();
         document.getElementById("taxesContent").style.display = "block"; 
+        document.getElementById("balanceSection").style.display="none";
+    }
+    else if(selectedValue =="history"){
+        document.getElementById("historyContent").style.display = "block"; 
         document.getElementById("balanceSection").style.display="none";
     }
     else {
