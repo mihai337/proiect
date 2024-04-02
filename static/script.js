@@ -1,6 +1,6 @@
 
-const ip = "http://192.168.1.63:8000";
-// const ip = 'http://127.0.0.1:8000';
+// const ip = "http://192.168.1.63:8000";
+const ip = 'http://127.0.0.1:8000';
 
 
 function logout() {
@@ -326,10 +326,6 @@ function populateTaxes() {
         //     listItem.appendChild(payButton);
         //     taxesList.appendChild(listItem);
         // });
-
-
-        
-    
 }
 
 
@@ -341,9 +337,18 @@ function populateHistory() {
         .then(response => response.json())
         .then((data) => {
             data.forEach(transaction => {
-                const listItem = document.createElement("li");
-                listItem.textContent = `${transaction.date}: ${transaction.description} - $${transaction.amount.toFixed(2)}`;
-                historyList.appendChild(listItem);
+                if(transaction.to){
+                    console.log(transaction);
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${transaction.from}->${transaction.to}: ${transaction.message} - $${transaction.amount}`;
+                    historyList.appendChild(listItem);
+                }
+                else{
+                    console.log(transaction);
+                    const listItem = document.createElement("li");
+                    listItem.textContent = `${transaction.from}: ${transaction.message} - $${transaction.amount}`;
+                    historyList.appendChild(listItem);
+                }
             });
         })
         .catch(error => {
@@ -376,6 +381,7 @@ function showSection() {
         document.getElementById("balanceSection").style.display="none";
     }
     else if(selectedValue =="history"){
+        populateHistory();
         document.getElementById("historyContent").style.display = "block"; 
         document.getElementById("balanceSection").style.display="none";
     }
