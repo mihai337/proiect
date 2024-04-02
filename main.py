@@ -7,6 +7,7 @@ import random
 from json import dumps,loads
 import uvicorn
 from hasher import hash
+from pprint import pprint
 
 app = FastAPI()
 app.add_middleware(
@@ -102,13 +103,23 @@ def addfunds(user : PartialUser):
         balance = int(result["balance"])
         print(balance)
         Database.coll.update_one({"name" : user.name} , {"$set" : {"balance" : balance+float(user.balance)}})
+        Database.history.insert_one({"from" : user.name , "amount" : user.balance , "message" : "funds added"})
         raise HTTPException(status_code=status.HTTP_200_OK)
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
 
 @app.post("/sendbill")
 def sendBill(data : Bill):
-    #check is username in database
+    #check is username in database and if the amount is a positive number
+
+    results = Database.coll.find({"name" : data.username})
+    result = [x for x in results][0]
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    
+    if data.amount < 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+    
     rqueue = Rds(data.username)
     uid = random.randint(0,1000000)
     message = {
@@ -175,7 +186,29 @@ def paybill(name ,uid):
 
     Database.coll.update_one({"name" : name} , {"$set" : {"balance" : result['balance']-float(message['amount'])}})
     Database.coll.update_one({"name" : message['factName']} , {"$set" : {"balance" : result_fact['balance']+float(message['amount'])}})
+
+    Database.history.insert_one({"from" : name , "to" : message['factName'] , "amount" : message['amount'] , "message" : message['factName'] + " bill has been payed"})
     raise HTTPException(status_code=status.HTTP_200_OK)
+
+
+
+@app.get("/gethistory/{name}")
+def gethistory(name):
+    data=[]
+    results = Database.history.find({"from" : name})
+
+    for result in results:
+        result.pop("_id")
+        data.append(result)
+
+    results = Database.history.find({"to" : name})
+    for result in results:
+        result.pop("_id")
+        data.append(result)
+
+    if data == []:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+    return data
 
 
 if __name__ == "__main__":
