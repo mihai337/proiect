@@ -28,7 +28,7 @@
             backdrop-filter: blur(20px);
             padding: 30px 40px;
             width: 275px;
-            height:400px;
+            height:430px;
             border-radius: 8px;
             color: #fff;
             padding: 20px;
@@ -72,13 +72,13 @@
             cursor: pointer;
             font-size: 16px;
         }
-        i.bx {
-            position: relative;
-            left: 245px;
-            bottom: 44px;
-            color: #fff;
-            pointer-events: none;
-        }
+            i.bx {
+                position: relative;
+                left: 245px;
+                bottom: 44px;
+                color: #fff;
+                pointer-events: none;
+            }
 
         input::placeholder{
             color: #fff;
@@ -96,6 +96,26 @@
 
         a.login-link:hover{
             text-decoration: underline;
+        }
+
+        #re-password {
+            margin-bottom: 0;
+        }
+        #re-password-icon{
+            bottom:27px;
+        }
+
+        .user-type-container select {
+            width: 200px;
+            text-align: center;
+            margin-bottom: 20px;
+            margin-left: 35px;
+            padding: 8px;
+            border-radius: 30px; 
+            border: 2px solid rgba(0, 0, 0, 0.2);
+            background-color: #fff; 
+            color: #000; 
+            font-size: 15px; 
         }
 
     </style>
@@ -117,7 +137,14 @@
             <label for="re-password" style="display: none;">Re-Password:</label>
             <input type="password" id="re-password" name="re-password"placeholder="Re-Password" required>
             <i class='bx bxs-lock' id="re-password-icon"></i>
-
+            <div class="user-type-container">
+            <label for="user-type"></label>
+            <select id="user-type" name="user-type" required>
+                <option value="" disabled selected>Select user type</option>
+                <option value="admin">Admin</option>
+                <option value="user">User</option>
+            </select>
+            </div>      
             <button type="button" onclick="signin()">Sign-in</button>
             <p>Already have an account? <a href="/login" class="login-link">Login here</a></p>
         </form>

@@ -130,6 +130,8 @@
             margin-bottom: 20px;
             max-width: 400px;
             width: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
@@ -157,7 +159,7 @@
 
         #taxesItems li {
             margin-bottom: 10px;
-            color: #333;
+            color: #fff;
         }
         #taxesContent  .container{
             display: none !important;
@@ -173,6 +175,8 @@
             margin-bottom: 20px;
             max-width: 400px;
             width: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
@@ -180,10 +184,10 @@
             background-position: center;
         }
         #historyContent h1 {
-            justify-content: center;
+            ustify-content: center;
             align-items: center;
             margin-bottom: 20px;
-            color: #fff;
+            color: #333;
         }
 
         #historyList {
@@ -200,7 +204,7 @@
 
         #historyItems li {
             margin-bottom: 10px;
-            color: #333;
+            color: #fff;
         }
         #historyContent  .container{
             display: none !important;
@@ -264,7 +268,7 @@
 
     <div id="historyContent" style ="display: none">
         <hi>History</hi>
-        <div id="historyList">
+        <div id"historyList">
             <h2>All payments</h2>
             <ul id="historyItems"></ul>
         </div>
