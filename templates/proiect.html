@@ -10,8 +10,9 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: rgb(42,171,81);
-            background: linear-gradient(90deg ,   rgba(42,171,81,1) 0%, rgba(5,154,20,1) 65% , rgba(2,56,38,1) 100%);
+            background: url('/static/pozika.jpg') no-repeat;
+            background-size: cover;
+            background-position: center;
             margin: 0;
             padding: 0;
             display: flex;
@@ -22,40 +23,31 @@
         }
 
         .container {
-            background-color: #fff;
+            background: transparent;
+            border: 2px solid rgba(255,255,255,.2);
+            backdrop-filter: blur(20px);
             border-radius: 8px;
             padding: 30px;
-            box-shadow: 0 4 16px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             margin-bottom: 20px;
             max-width: 400px;
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-
-            background-image: url('https://media.istockphoto.com/id/1492189677/photo/bank-symbol-with-with-coins-stack-concepts-of-the-banking-system-rising-interest-rates.webp?b=1&s=170667a&w=0&k=20&c=4juSl-CA3dqdm7SoZzKMkOyABsMeIeNYoNKH-0zYDsc=');
-            background-size: cover; 
+            color: #fff;
             background-position: center; 
-            background-repeat: no-repeat; 
-            background-color: rgba(0, 0, 0, 0.5);
         }
        
-        .top-image {
-            position: relative; 
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        
-
         h1, h2 {
             margin: 0 0 20px;
-            color: #333;
+            color: #fff;
         }
 
         label {
             display: block;
             margin-bottom: 8px;
-            color: #000;
+            color: #fff;
         }
 
         #sectionSelect {
@@ -66,8 +58,8 @@
             border: 1px solid #18781c;
             border-radius: 6px;
             font-size: 16px;
-            background-color: #16811c;
-            color: #fff;
+            background-color: #fff;
+            color: #000;
         }
 
         input, button {
@@ -86,26 +78,19 @@
         }
 
         button {
-            background-color: #16811c;
-            color: #fff;
+            background-color: #fff;
+            color: #000;
             border: none;
             cursor: pointer;
             margin-left: 35px;
             transition: background-color 0.3s;
         }
 
-        button:hover {
-            background-color: #45a049;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
         
-        button:active{
-            background-color: #074a15;
-        }
 
         #sectionSelectContainer {
             position: absolute;
-            top: 20px;
+            top: 10px;
             left: 20px;
             z-index: 1;
         }
@@ -124,35 +109,38 @@
             right: 20px;
         }
         #logoutButton{
-            background-color: #16811c;
-            color: #fff;
+            background-color: #;
+            color: #000;
             transition: background-color 0.3s, color 0.3s;
         }
         #logoutButton:hover{
-            background-color: #45a049;
-            color: #fff;
+            background-color: #fff;
+            color: #000;
         }
-        #logoutButton:active{
-            background-color: #074a15;
-        }
+    
 
        
         #taxesContent {
-            background-color: #fff;
-            width: 400px;
-            height: 300px;
-            overflow-y: auto;
-            overflow-x: hidden;
+            background: transparent;
+            border: 2px solid rgba(255,255,255,.2);
+            backdrop-filter: blur(20px);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            max-width: 400px;
+            width: 100%;
             display: flex;
-            justify-content: center;
-            align-items: center;
             flex-direction: column;
+            align-items: flex-start;
+            color: #fff;
+            background-position: center;
         }
         #taxesContent h1 {
             justify-content: center;
             align-items: center;
             margin-bottom: 20px;
-            color: #333;
+            color: #fff;
         }
 
         #taxesList {
@@ -176,21 +164,26 @@
         }
 
         #historyContent {
-            background-color: #fff;
-            width: 400px;
-            height: 300px;
-            overflow-y: auto;
-            overflow-x: hidden;
+            background: transparent;
+            border: 2px solid rgba(255,255,255,.2);
+            backdrop-filter: blur(20px);
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            max-width: 400px;
+            width: 100%;
             display: flex;
-            justify-content: center;
-            align-items: center;
             flex-direction: column;
+            align-items: flex-start;
+            color: #fff;
+            background-position: center;
         }
         #historyContent h1 {
             ustify-content: center;
             align-items: center;
             margin-bottom: 20px;
-            color: #333;
+            color: #fff;
         }
 
         #historyList {
