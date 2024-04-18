@@ -55,6 +55,24 @@
             position: relative;
         }
 
+        #logoutButton {
+            width: 70px;
+            padding: 8px;
+            font-size: 14px;
+            position: fixed; /* Change position to fixed */
+            top: 20px;
+            right: 20px;
+            z-index: 999; /* Add z-index to ensure it's above other elements */
+            background-color: #fff;
+            color: #000;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        #logoutButton:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
         button {
             width: 100%;
             height: 45px;
@@ -83,7 +101,9 @@
             <button type="button" onclick="sendBill()">Send Bill</button>
         </form>
 
+
     </div>
+    <button id="logoutButton" onclick="logout()">Logout</button>
 </body>
 
 </html>
