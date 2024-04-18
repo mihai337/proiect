@@ -162,10 +162,12 @@
         window.addEventListener('resize', adjustInputPadding); 
 
         function adjustInputPadding() {
-            const iconWidth = usernameIcon.offsetWidth; 
-            document.getElementById('username').style.paddingRight = iconWidth + 20 + 'px'; 
-            document.getElementById('password').style.paddingRight = iconWidth + 20 + 'px';
-            document.getElementById('re-password').style.paddingRight = iconWidth + 20 + 'px';
+            if (usernameIcon && passwordIcon && repasswordIcon) {
+                const iconWidth = usernameIcon.offsetWidth;
+                document.getElementById('new-username').style.paddingRight = iconWidth + 20 + 'px';
+                document.getElementById('new-password').style.paddingRight = iconWidth + 20 + 'px';
+                document.getElementById('re-password').style.paddingRight = iconWidth + 20 + 'px';
+            }
         }
 
     </script>
