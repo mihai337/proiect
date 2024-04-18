@@ -177,6 +177,7 @@ function signin() { //adauga user type cu drop down menu
     var u = document.getElementById('new-username').value;
     var p = document.getElementById('new-password').value;
     var rp = document.getElementById('re-password').value;
+    var t = document.getElementById('user-type').value;
 
     if (u == '' || p == '' || rp == '') {
         alert('Completaţi toate câmpurile');
@@ -193,7 +194,7 @@ function signin() { //adauga user type cu drop down menu
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name: u, password: p }),
+        body: JSON.stringify({ name: u, password: p , type: t}),
     })
         .then(response => {
             if(response.status == 200){

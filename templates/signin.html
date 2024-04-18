@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/static/script.js"></script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <title>Bank Page</title>
     <style>
@@ -138,12 +139,12 @@
             <input type="password" id="re-password" name="re-password"placeholder="Re-Password" required>
             <i class='bx bxs-lock' id="re-password-icon"></i>
             <div class="user-type-container">
-            <label for="user-type"></label>
-            <select id="user-type" name="user-type" required>
-                <option value="" disabled selected>Select user type</option>
-                <option value="admin">Admin</option>
-                <option value="user">User</option>
-            </select>
+                <label for="user-type"></label>
+                <select id="user-type" name="user-type" required>
+                    <option value="" disabled selected>Select user type</option>
+                    <option value="fact">Facturier</option>
+                    <option value="user">User</option>
+                </select>
             </div>      
             <button type="button" onclick="signin()">Sign-in</button>
             <p>Already have an account? <a href="/login" class="login-link">Login here</a></p>

@@ -29,7 +29,7 @@ def sign_in(user : User):
     for result in results:
         # print("1")
         raise HTTPException(status_code=status.HTTP_302_FOUND)
-    Database.coll.insert_one({"name":user.name , "password":hash(user.password) , "balance":user.balance , "type" : "user"})
+    Database.coll.insert_one({"name":user.name , "password":hash(user.password) , "balance":user.balance , "type" : user.type})
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 
