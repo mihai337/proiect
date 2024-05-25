@@ -100,8 +100,8 @@ def transfer(mainUser : str , secondaryUser : PartialUser):
 def addfunds(user : PartialUser):
     results = Database.coll.find({"name" : user.name})
     for result in results:
-        balance = int(result["balance"])
-        print(balance)
+        balance = float(result["balance"])
+        # print(balance)
         Database.coll.update_one({"name" : user.name} , {"$set" : {"balance" : balance+float(user.balance)}})
         Database.history.insert_one({"from" : user.name , "amount" : user.balance , "message" : "funds added"})
         raise HTTPException(status_code=status.HTTP_200_OK)
@@ -113,8 +113,8 @@ def sendBill(data : Bill):
     #check is username in database and if the amount is a positive number
 
     results = Database.coll.find({"name" : data.username})
-    result = [x for x in results][0]
-    if result is None:
+    result = [x for x in results]
+    if result is None or not result:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     
     if data.amount < 0:
@@ -136,6 +136,12 @@ def sendBill(data : Bill):
 
 @app.get("/getbills/{name}")
 def getbills(name):
+    #check if the user exists
+    results = Database.coll.find({"name" : name})
+    result = [x for x in results]
+    if result is None or not result:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
     first=True
     rq = Rds(name=name)
     message = rq.redis_conn.rpop(name=name)
