@@ -21,15 +21,15 @@ services:
       image: "mongo:latest"
       ports:
         - "27017:27017"
-      volumes:
-        - 0feeca61b26d2e513a49b20d3fc40cb6c9bebd9db36e78fb3904828a6e2845fe:/data/db
-        - 0feeca61b26d2e513a49b20d3fc40cb6c9bebd9db36e78fb3904828a6e2845fe:/data/configdb
+      # volumes:
+      #   - 0feeca61b26d2e513a49b20d3fc40cb6c9bebd9db36e78fb3904828a6e2845fe:/data/db
+      #   - 0feeca61b26d2e513a49b20d3fc40cb6c9bebd9db36e78fb3904828a6e2845fe:/data/configdb
 
   redis:
       image: "redis:latest"
       ports:
         - "6379:6379"
   
-volumes:
-  0feeca61b26d2e513a49b20d3fc40cb6c9bebd9db36e78fb3904828a6e2845fe:
-    external: true
+# volumes:
+#   0feeca61b26d2e513a49b20d3fc40cb6c9bebd9db36e78fb3904828a6e2845fe:
+#     external: true
