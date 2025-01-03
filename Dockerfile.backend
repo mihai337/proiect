@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN pip3 install fastapi python-multipart redis rq pymongo pydantic typing uvicorn requests flask pytest httpx
+RUN pip3 install fastapi python-multipart redis rq pydantic typing uvicorn requests pytest httpx firebase-admin
 
 # CMD python main.py
 CMD python main.py
