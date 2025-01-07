@@ -1,5 +1,6 @@
-from fastapi import FastAPI,HTTPException,status,Form, Header
+from fastapi import FastAPI,HTTPException,status,Form, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from models import User,PartialUser,Bill
 from msg_broker import Rds
 import random
@@ -16,6 +17,7 @@ except ValueError:
     firebase_admin.initialize_app(cred)
 
 firestore_db = firestore.client()
+auth_scheme = HTTPBearer()
 
 app = FastAPI()
 app.add_middleware(
@@ -28,8 +30,8 @@ app.add_middleware(
 
 #TODO : when an account is created, a user should be created in the database with a balance of 0 and a type of user
 
-def verify_token(token):
-    # {
+def verify_token(credentials : HTTPAuthorizationCredentials = Depends(auth_scheme)):
+    # test = {
     #     "iss": "https://securetoken.google.com/ssd0-68e95",
     #     "aud": "ssd0-68e95",
     #     "auth_time": 1734565573,
@@ -38,7 +40,7 @@ def verify_token(token):
     #     "iat": 1734565573,
     #     "exp": 1734569173,
     #     "email": "constantinm7787@gmail.com",
-    #     "email_verified": false,
+    #     "email_verified": False,
     #     "firebase": {
     #         "identities": {
     #         "email": [
@@ -48,7 +50,9 @@ def verify_token(token):
     #         "sign_in_provider": "password"
     #     },
     #     "uid": "vfFQcZ5r6caXi9X9v4Dxtx8VYEI2"
-    # }
+    # }  
+
+    token = credentials.credentials
     try:
         decoded_token = auth.verify_id_token(token)
         return decoded_token
@@ -69,13 +73,29 @@ def verify_token(token):
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
+
 @app.get("/")
 def home():
     raise HTTPException(status_code=status.HTTP_200_OK)
 
+@app.get("/create")
+def create_user(user : dict = Depends(verify_token)):
+    doc_ref = firestore_db.collection("users").document(user['uid'])
+    doc = doc_ref.get()
+    print(user)
+    if not doc.exists:
+        doc_ref.set({
+            "email" : user['email'],
+            "balance" : 0,
+            "history" : [],
+            "type" : ["user"]
+        })
+        return {"status" : "User created"}
+    else:
+        return {"status" : "User already exists"}
+
 @app.get("/balance")
-def get_balance(authorization : str = Header(None)):
-    user = verify_token(authorization)
+def get_balance(user : dict = Depends(verify_token)):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     
@@ -84,9 +104,9 @@ def get_balance(authorization : str = Header(None)):
     if doc.exists:
         return {"balance" : doc.to_dict()['balance']}
 
-@app.post("/transfer")
-def transfer(secondaryUser : PartialUser, authorization : str = Header(None)):
-    mainUser = verify_token(authorization)
+@app.post("/transfer") #modify this
+def transfer(secondaryUser : PartialUser, user : dict = Depends(verify_token)):
+    mainUser = user
     if(float(secondaryUser.balance) < 0):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     
@@ -111,9 +131,8 @@ def transfer(secondaryUser : PartialUser, authorization : str = Header(None)):
     # print(mainRes)
     raise HTTPException(status_code=status.HTTP_200_OK)
       
-@app.post("/addfunds")
-def addfunds(authorization : str = Header(None), amount : float = Form(...)):
-    user = verify_token(authorization)
+@app.post("/modifyfunds")
+def addfunds(user : dict = Depends(verify_token), amount : float = Form(...)):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     doc_ref = firestore_db.collection("users").document(user['uid'])
@@ -121,20 +140,22 @@ def addfunds(authorization : str = Header(None), amount : float = Form(...)):
     if doc.exists:
         user_data = doc.to_dict()
         user_data['balance'] += amount
+        if amount < 0:
+            user_data['history'].append({"from": "system", "to": user['uid'] , "amount" : amount , "message" : "Funds have been withdrawn"})
+        else:
+            user_data['history'].append({"from": "system", "to": user['uid'] , "amount" : amount , "message" : "Funds have been added"})
         doc_ref.update(user_data)
         return user_data
 
 @app.post("/sendbill")
-def sendBill(data : Bill, authorization : str = Header(None)):
-    user = verify_token(authorization)
-    
+def sendBill(data : Bill, user : dict = Depends(verify_token)):
     if data.amount < 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
     
     rqueue = Rds(data.username)
     uid = random.randint(0,1000000)
     message = {
-        "username" : data.username,
+        "username" : user['uid'],
         "factName" : data.factName,
         "amount" : data.amount,
         "uid":uid
@@ -145,8 +166,7 @@ def sendBill(data : Bill, authorization : str = Header(None)):
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 @app.get("/bills")
-def getbills(authorization : str = Header(None)):
-    user = verify_token(authorization)
+def getbills(user : dict = Depends(verify_token)):
     name = user['uid']
 
     first=True
@@ -168,8 +188,7 @@ def getbills(authorization : str = Header(None)):
     return data
 
 @app.get("/paybill/{uid}")
-def paybill(uid, authorization : str = Header(None)):
-    user = verify_token(authorization)
+def paybill(uid, user : dict = Depends(verify_token)):
     name = user['uid']
     rq = Rds(name=name)
     message = rq.redis_conn.rpop(name=name)
@@ -186,11 +205,13 @@ def paybill(uid, authorization : str = Header(None)):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND) #handeling the case when the bill is not found
 
 
-    result = Database.coll.find({"name" : name})
-    result = [x for x in result][0]
-    result_fact = Database.coll.find({"name" : message['factName']})
-    result_fact = [x for x in result_fact][0]
-    if result is None or result_fact is None:
+    result_ref = firestore_db.collection("users").document(name)
+    result_fact_ref = firestore_db.collection("users").document(message['factName'])
+
+    result = result_ref.get()
+    result_fact = result_fact_ref.get()
+
+    if not result.exists or not result_fact.exists:
         rq.redis_conn.lpush(name , dumps(message))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
@@ -199,15 +220,22 @@ def paybill(uid, authorization : str = Header(None)):
         rq.redis_conn.lpush(name , dumps(message))
         raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED) #handeling the case when the user does not have enough money
 
-    Database.coll.update_one({"name" : name} , {"$set" : {"balance" : result['balance']-float(message['amount'])}})
-    Database.coll.update_one({"name" : message['factName']} , {"$set" : {"balance" : result_fact['balance']+float(message['amount'])}})
+    result = result.to_dict()
+    result_fact = result_fact.to_dict()
 
-    Database.history.insert_one({"from" : name , "to" : message['factName'] , "amount" : message['amount'] , "message" : message['factName'] + " bill has been payed"})
+    result["balance"] = result["balance"] - float(message['amount'])
+    result_fact["balance"] = result_fact["balance"] + float(message['amount'])
+
+    result["history"].append({"from": name, "to": message['factName'] , "amount" : -float(message['amount']) , "message" : message['factName'] + " bill has been payed"})
+    result_fact["history"].append({"from": name, "to": message['factName'] , "amount" : float(message['amount']) , "message" : message['factName'] + " bill has been payed"})
+
+    result_ref.update(result)
+    result_fact_ref.update(result_fact)
+
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 @app.get("/history")
-def gethistory(authorization : str = Header(None)):
-    user = verify_token(authorization)
+def gethistory(user : dict = Depends(verify_token)):
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     

@@ -13,4 +13,4 @@ If you want to use docker, you just need to run:
 docker compose up
 ```
 
-You should pay attention to the ports, as the app is designed to work on docker.
+You should have a file named "firebase-admin.json" for firebase configuration.
