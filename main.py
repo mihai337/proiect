@@ -1,7 +1,7 @@
 from fastapi import FastAPI,HTTPException,status,Form, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from models import User,PartialUser,Bill
+from models import User,TransferRequest,Bill
 from msg_broker import Rds
 import random
 from json import dumps,loads
@@ -73,10 +73,13 @@ def verify_token(credentials : HTTPAuthorizationCredentials = Depends(auth_schem
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-
 @app.get("/")
 def home():
     raise HTTPException(status_code=status.HTTP_200_OK)
+
+@app.get("/whoami")
+def whoami(user : dict = Depends(verify_token)):
+    return user
 
 @app.get("/create")
 def create_user(user : dict = Depends(verify_token)):
@@ -104,31 +107,41 @@ def get_balance(user : dict = Depends(verify_token)):
     if doc.exists:
         return {"balance" : doc.to_dict()['balance']}
 
-@app.post("/transfer") #modify this
-def transfer(secondaryUser : PartialUser, user : dict = Depends(verify_token)):
-    mainUser = user
-    if(float(secondaryUser.balance) < 0):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    
-    doc_ref = firestore_db.collection("users").document(mainUser['uid'])
-    doc = doc_ref.get()
-    if not doc.exists:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User found, but no data found in the database")
-    mainRes = doc.to_dict()
+@app.post("/transfer")
+def transfer(transferDetails : TransferRequest, user : dict = Depends(verify_token)):
 
-    doc_ref = firestore_db.collection("users").document(secondaryUser.name)
-    doc = doc_ref.get()
-    if not doc.exists:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User found, but no data found in the database")
-    mainRes = doc.to_dict()
+    if user['email'] == transferDetails.email:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="You cannot send money to yourself")
 
-    if(mainRes['balance'] - float(secondaryUser.balance) < 0):
-        raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
+    if(transferDetails.amount < 0):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You cannot send a negative amount of money")
     
-    # print(int(secondaryUser.balance))
-    Database.coll.update_one({"name" : mainUser} , {"$set" : {"balance" : mainRes['balance']-float(secondaryUser.balance)}})
-    Database.coll.update_one({"name" : secondaryUser.name} , {"$set" : {"balance" : secRes['balance']+float(secondaryUser.balance)}})
-    # print(mainRes)
+    user_ref = firestore_db.collection("users").document(user['uid'])
+    user_doc = user_ref.get()
+    if not user_doc.exists:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User found, but no data found in the database")
+    user_res = user_doc.to_dict()
+
+    transferUser = auth.get_user_by_email(transferDetails.email)
+    transferUserId = transferUser.uid
+
+    transferUserDocRef = firestore_db.collection("users").document(transferUserId)
+    transferUserDoc = transferUserDocRef.get()
+    if not transferUserDoc.exists:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User found, but no data found in the database")
+    transferUserRes = transferUserDoc.to_dict()
+
+    if(user_res['balance'] - transferDetails.amount < 0):
+        raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED, detail="Insufficient funds")
+    
+    user_res["balance"] = user_res["balance"] - transferDetails.amount
+    user_res["history"].append({"from": user['uid'], "to": transferUserId , "amount" : -transferDetails.amount , "message" : "Money has been sent to " + transferDetails.email})
+
+    transferUserRes["balance"] = transferUserRes["balance"] + transferDetails.amount
+    transferUserRes["history"].append({"from": user['uid'], "to": transferUserId , "amount" : transferDetails.amount , "message" : "Money has been received from " + user['email']})
+    
+    user_ref.update(user_res)
+    transferUserDocRef.update(transferUserRes)
     raise HTTPException(status_code=status.HTTP_200_OK)
       
 @app.post("/modifyfunds")
@@ -147,22 +160,35 @@ def addfunds(user : dict = Depends(verify_token), amount : float = Form(...)):
         doc_ref.update(user_data)
         return user_data
 
-@app.post("/sendbill")
+@app.post("/sendbill") #fix sending bill to yourself
 def sendBill(data : Bill, user : dict = Depends(verify_token)):
     if data.amount < 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
     
-    rqueue = Rds(data.username)
+    userDocRef = firestore_db.collection("users").document(user['uid'])
+    userDoc = userDocRef.get()
+    if not userDoc.exists:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User found, but no data found in the database")
+    userData = userDoc.to_dict()
+
+    if "fact" not in userData['type']:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="You are not authorized to send bills")
+    
+    recipientAuth = auth.get_user_by_email(data.recipient)
+    recipientId = recipientAuth.uid
+
+    
+    rqueue = Rds(name=recipientId)
     uid = random.randint(0,1000000)
     message = {
         "username" : user['uid'],
-        "factName" : data.factName,
+        "recipient" : data.recipient,
         "amount" : data.amount,
         "uid":uid
     }
 
     message = dumps(message)
-    rqueue.redis_conn.lpush(data.username , message)
+    rqueue.redis_conn.lpush(recipientId , message)
     raise HTTPException(status_code=status.HTTP_200_OK)
 
 @app.get("/bills")
@@ -182,13 +208,13 @@ def getbills(user : dict = Depends(verify_token)):
         first = False
 
     if data == []:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND) #handeling the case when the bill is not found
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No bills found") #handeling the case when the bill is not found
     
     rq.redis_conn.lpush(name , message)
     return data
 
 @app.get("/paybill/{uid}")
-def paybill(uid, user : dict = Depends(verify_token)):
+def paybill(uid : int, user : dict = Depends(verify_token)):
     name = user['uid']
     rq = Rds(name=name)
     message = rq.redis_conn.rpop(name=name)
@@ -202,11 +228,12 @@ def paybill(uid, user : dict = Depends(verify_token)):
         message = rq.redis_conn.rpop(name=name)
         message = loads(message.decode("ASCII"))
         if init_uid == message['uid']:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND) #handeling the case when the bill is not found
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bill not found")
 
+    recipientDetails = auth.get_user_by_email(message['recipient'])
 
     result_ref = firestore_db.collection("users").document(name)
-    result_fact_ref = firestore_db.collection("users").document(message['factName'])
+    result_fact_ref = firestore_db.collection("users").document(recipientDetails.uid)
 
     result = result_ref.get()
     result_fact = result_fact_ref.get()
@@ -215,19 +242,18 @@ def paybill(uid, user : dict = Depends(verify_token)):
         rq.redis_conn.lpush(name , dumps(message))
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
+    result = result.to_dict()
+    result_fact = result_fact.to_dict()
 
     if result['balance'] - float(message['amount']) < 0:
         rq.redis_conn.lpush(name , dumps(message))
-        raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED) #handeling the case when the user does not have enough money
-
-    result = result.to_dict()
-    result_fact = result_fact.to_dict()
+        raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
 
     result["balance"] = result["balance"] - float(message['amount'])
     result_fact["balance"] = result_fact["balance"] + float(message['amount'])
 
-    result["history"].append({"from": name, "to": message['factName'] , "amount" : -float(message['amount']) , "message" : message['factName'] + " bill has been payed"})
-    result_fact["history"].append({"from": name, "to": message['factName'] , "amount" : float(message['amount']) , "message" : message['factName'] + " bill has been payed"})
+    result["history"].append({"from": name, "to": message['recipient'] , "amount" : -float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
+    result_fact["history"].append({"from": name, "to": message['recipient'] , "amount" : float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
 
     result_ref.update(result)
     result_fact_ref.update(result_fact)

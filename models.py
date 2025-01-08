@@ -7,11 +7,10 @@ class User(BaseModel):
     type : Optional[str] = None
     balance : Optional[float] = 0
 
-class PartialUser(BaseModel):
-    name : str
-    balance : Optional[str] = None
+class TransferRequest(BaseModel):
+    email : str
+    amount : Optional[float] = 0
 
 class Bill(BaseModel):
-    factName : str
-    username : str
+    recipient : str
     amount : float
