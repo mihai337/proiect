@@ -229,36 +229,40 @@ def paybill(uid : int, user : dict = Depends(verify_token)):
         message = loads(message.decode("ASCII"))
         if init_uid == message['uid']:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bill not found")
+        
+    try:
+        recipientDetails = auth.get_user_by_email(message['recipient'])
 
-    recipientDetails = auth.get_user_by_email(message['recipient'])
+        result_ref = firestore_db.collection("users").document(name)
+        result_fact_ref = firestore_db.collection("users").document(recipientDetails.uid)
 
-    result_ref = firestore_db.collection("users").document(name)
-    result_fact_ref = firestore_db.collection("users").document(recipientDetails.uid)
+        result = result_ref.get()
+        result_fact = result_fact_ref.get()
 
-    result = result_ref.get()
-    result_fact = result_fact_ref.get()
+        if not result.exists or not result_fact.exists:
+            rq.redis_conn.lpush(name , dumps(message))
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-    if not result.exists or not result_fact.exists:
+        result = result.to_dict()
+        result_fact = result_fact.to_dict()
+
+        if result['balance'] - float(message['amount']) < 0:
+            rq.redis_conn.lpush(name , dumps(message))
+            raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
+
+        result["balance"] = result["balance"] - float(message['amount'])
+        result_fact["balance"] = result_fact["balance"] + float(message['amount'])
+
+        result["history"].append({"from": name, "to": message['recipient'] , "amount" : -float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
+        result_fact["history"].append({"from": name, "to": message['recipient'] , "amount" : float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
+
+        result_ref.update(result)
+        result_fact_ref.update(result_fact)
+
+        raise HTTPException(status_code=status.HTTP_200_OK)
+    except Exception as e:
         rq.redis_conn.lpush(name , dumps(message))
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
-    result = result.to_dict()
-    result_fact = result_fact.to_dict()
-
-    if result['balance'] - float(message['amount']) < 0:
-        rq.redis_conn.lpush(name , dumps(message))
-        raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
-
-    result["balance"] = result["balance"] - float(message['amount'])
-    result_fact["balance"] = result_fact["balance"] + float(message['amount'])
-
-    result["history"].append({"from": name, "to": message['recipient'] , "amount" : -float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
-    result_fact["history"].append({"from": name, "to": message['recipient'] , "amount" : float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
-
-    result_ref.update(result)
-    result_fact_ref.update(result_fact)
-
-    raise HTTPException(status_code=status.HTTP_200_OK)
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @app.get("/history")
 def gethistory(user : dict = Depends(verify_token)):
