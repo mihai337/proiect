@@ -28,8 +28,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-#TODO : when an account is created, a user should be created in the database with a balance of 0 and a type of user
-
 def verify_token(credentials : HTTPAuthorizationCredentials = Depends(auth_scheme)):
     # test = {
     #     "iss": "https://securetoken.google.com/ssd0-68e95",
