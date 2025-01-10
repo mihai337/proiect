@@ -1,0 +1,11 @@
+fastapi
+python-multipart
+redis
+rq
+pydantic
+typing
+uvicorn
+requests
+pytest
+httpx
+firebase-admin
