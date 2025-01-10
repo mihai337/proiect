@@ -3,3 +3,4 @@ venv/
 firebase.json
 firebase-admin.json
 .DS_Store
+.env
