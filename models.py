@@ -14,3 +14,6 @@ class TransferRequest(BaseModel):
 class Bill(BaseModel):
     recipient : str
     amount : float
+
+class CreateUserRequest(BaseModel):
+    type : str

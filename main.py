@@ -1,7 +1,7 @@
 from fastapi import FastAPI,HTTPException,status,Form, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from models import User,TransferRequest,Bill
+from models import User,TransferRequest,Bill, CreateUserRequest
 from msg_broker import Rds
 import random
 from json import dumps,loads
@@ -16,7 +16,7 @@ try:
     firebase_admin.get_app()
 except ValueError:
     ON_HEROKU = os.environ.get('ON_HEROKU')
-    
+
     if ON_HEROKU == "True":
         print("INFO:     Running on Heroku")
         typeVar = os.environ.get('TYPE')
@@ -120,8 +120,12 @@ def home():
 def whoami(user : dict = Depends(verify_token)):
     return user
 
-@app.get("/create")
-def create_user(user : dict = Depends(verify_token)):
+@app.post("/create")
+def create_user(createUserRequest : CreateUserRequest, user : dict = Depends(verify_token)):
+
+    if "fact" not in createUserRequest.type or "user" not in createUserRequest.type:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid type")
+
     doc_ref = firestore_db.collection("users").document(user['uid'])
     doc = doc_ref.get()
     print(user)
@@ -130,7 +134,7 @@ def create_user(user : dict = Depends(verify_token)):
             "email" : user['email'],
             "balance" : 0,
             "history" : [],
-            "type" : ["user"]
+            "type" : [createUserRequest.type]
         })
         return {"status" : "User created"}
     else:
