@@ -10,14 +10,16 @@ from pprint import pprint
 import firebase_admin
 from firebase_admin import credentials, auth, firestore
 import os
+import json
 
 try:
     firebase_admin.get_app()
 except ValueError:
     ON_HEROKU = os.environ.get('ON_HEROKU')
+    
     if ON_HEROKU == "True":
         print("INFO:     Running on Heroku")
-        type = os.environ.get('TYPE')
+        typeVar = os.environ.get('TYPE')
         project_id = os.environ.get('PROJECT_ID')
         private_key_id = os.environ.get('PRIVATE_KEY_ID')
         private_key = os.environ.get('PRIVATE_KEY')
@@ -29,18 +31,27 @@ except ValueError:
         client_x509_cert_url = os.environ.get('CLIENT_X509_CERT_URL')
         universe_domain = os.environ.get('UNIVERSE_DOMAIN')
 
-        cred = credentials.Certificate({
-            "type": type,
-            "project_id": project_id,
-            "private_key_id": private_key_id,
-            "private_key": private_key,
-            "client_email": client_email,
-            "client_id": client_id,
-            "auth_uri": auth_uri,
-            "token_uri": token_uri,
-            "auth_provider_x509_cert_url": auth_provider_x509_cert_url,
-            "client_x509_cert_url": client_x509_cert_url
-        })
+        try:
+            private_key = private_key.replace("\\n", "\n")
+
+            firebaseCred = {
+                "type": typeVar,
+                "project_id": project_id,
+                "private_key_id": private_key_id,
+                "private_key": private_key,
+                "client_email": client_email,
+                "client_id": client_id,
+                "auth_uri": auth_uri,
+                "token_uri": token_uri,
+                "auth_provider_x509_cert_url": auth_provider_x509_cert_url,
+                "client_x509_cert_url": client_x509_cert_url,
+                "universe_domain": universe_domain
+            }
+
+            cred = credentials.Certificate(firebaseCred)
+        except ValueError as e:
+            print("ERROR:    Unable to create credentials")  
+            exit(1)
     else:
         print("INFO:     Running locally")
         cred = credentials.Certificate("firebase-admin.json")
