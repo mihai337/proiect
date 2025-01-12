@@ -1,7 +1,7 @@
 from fastapi import FastAPI,HTTPException,status,Form, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from models import User,TransferRequest,Bill, CreateUserRequest
+from models import User,TransferRequest,Bill, CreateUserRequest, ModifyBalanceRequest
 from msg_broker import Rds
 import random
 from json import dumps,loads
@@ -188,20 +188,20 @@ def transfer(transferDetails : TransferRequest, user : dict = Depends(verify_tok
     raise HTTPException(status_code=status.HTTP_200_OK)
       
 @app.post("/modifyfunds")
-def addfunds(user : dict = Depends(verify_token), amount : float = Form(...)):
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+def addfunds(req : ModifyBalanceRequest, user : dict = Depends(verify_token)):
     doc_ref = firestore_db.collection("users").document(user['uid'])
     doc = doc_ref.get()
     if doc.exists:
         user_data = doc.to_dict()
-        user_data['balance'] += amount
-        if amount < 0:
-            user_data['history'].append({"from": "system", "to": user['uid'] , "amount" : amount , "message" : "Funds have been withdrawn"})
+        user_data['balance'] += req.amount
+        if req.amount < 0:
+            user_data['history'].append({"from": "system", "to": user['uid'] , "amount" : req.amount , "message" : "Funds have been withdrawn"})
         else:
-            user_data['history'].append({"from": "system", "to": user['uid'] , "amount" : amount , "message" : "Funds have been added"})
+            user_data['history'].append({"from": "system", "to": user['uid'] , "amount" : req.amount , "message" : "Funds have been added"})
         doc_ref.update(user_data)
         return user_data
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found, but no data found in the database")
 
 @app.post("/sendbill") #fix sending bill to yourself
 def sendBill(data : Bill, user : dict = Depends(verify_token)):

@@ -17,3 +17,6 @@ class Bill(BaseModel):
 
 class CreateUserRequest(BaseModel):
     type : str
+
+class ModifyBalanceRequest(BaseModel):
+    amount : float
