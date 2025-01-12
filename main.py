@@ -11,6 +11,8 @@ import firebase_admin
 from firebase_admin import credentials, auth, firestore
 import os
 import json
+from mailing import sendWelcomeEmail, mail_server_quit
+import threading
 
 try:
     firebase_admin.get_app()
@@ -60,7 +62,11 @@ except ValueError:
 firestore_db = firestore.client()
 auth_scheme = HTTPBearer()
 
-app = FastAPI()
+async def lifespan(app : FastAPI):
+    yield
+    mail_server_quit()
+
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -112,6 +118,7 @@ def verify_token(credentials : HTTPAuthorizationCredentials = Depends(auth_schem
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
+
 @app.get("/")
 def home():
     raise HTTPException(status_code=status.HTTP_200_OK)
@@ -128,7 +135,6 @@ def create_user(createUserRequest : CreateUserRequest, user : dict = Depends(ver
 
     doc_ref = firestore_db.collection("users").document(user['uid'])
     doc = doc_ref.get()
-    print(user)
     if not doc.exists:
         doc_ref.set({
             "email" : user['email'],
@@ -136,6 +142,9 @@ def create_user(createUserRequest : CreateUserRequest, user : dict = Depends(ver
             "history" : [],
             "type" : [createUserRequest.type]
         })
+
+        threading.Thread(target=sendWelcomeEmail, args=(user['email'],)).start()
+
         return {"status" : "User created"}
     else:
         return {"status" : "User already exists"}
