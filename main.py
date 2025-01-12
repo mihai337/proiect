@@ -314,8 +314,10 @@ def gethistory(user : dict = Depends(verify_token)):
     
     doc_ref = firestore_db.collection("users").document(user['uid'])
     doc = doc_ref.get()
-    if not doc.exists:
+    if doc.exists:
         return doc.to_dict()['history']
+    else:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No history found")
 
 # if __name__ == "__main__":
 #     uvicorn.run(app="main:app" , host="0.0.0.0" , port=8000, reload=True)
