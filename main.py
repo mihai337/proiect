@@ -203,6 +203,10 @@ def addfunds(req : ModifyBalanceRequest, user : dict = Depends(verify_token)):
     if doc.exists:
         user_data = doc.to_dict()
         user_data['balance'] += req.amount
+
+        if user_data['balance'] < 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Insufficient funds")
+
         if req.amount < 0:
             user_data['history'].append({"from": "system", "to": user['uid'] , "amount" : req.amount , "message" : "Funds have been withdrawn"})
         else:
@@ -212,7 +216,7 @@ def addfunds(req : ModifyBalanceRequest, user : dict = Depends(verify_token)):
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found, but no data found in the database")
 
-@app.post("/sendbill") #fix sending bill to yourself
+@app.post("/sendbill")
 def sendBill(data : Bill, user : dict = Depends(verify_token)):
     if data.amount < 0:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
