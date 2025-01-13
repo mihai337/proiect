@@ -302,21 +302,24 @@ def paybill(uid : int, user : dict = Depends(verify_token)):
         result = result.to_dict()
         result_fact = result_fact.to_dict()
 
-        if result['balance'] - float(message['amount']) < 0:
+        if result_fact["balance"] - float(message['amount']) < 0:
             rq.redis_conn.lpush(name , dumps(message))
             raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
 
-        result["balance"] = result["balance"] - float(message['amount'])
-        result_fact["balance"] = result_fact["balance"] + float(message['amount'])
+        result["balance"] = result["balance"] + float(message['amount'])
+        result_fact["balance"] = result_fact["balance"] - float(message['amount'])
 
-        result["history"].append({"from": name, "to": message['recipient'] , "amount" : -float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
-        result_fact["history"].append({"from": name, "to": message['recipient'] , "amount" : float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
+        result["history"].append({"from": name, "to": message['recipient'] , "amount" : float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
+        result_fact["history"].append({"from": name, "to": message['recipient'] , "amount" : -float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
 
         result_ref.update(result)
         result_fact_ref.update(result_fact)
 
         raise HTTPException(status_code=status.HTTP_200_OK)
     except Exception as e:
+        if isinstance(e, HTTPException) and e.status_code == status.HTTP_200_OK:
+            return
+        
         rq.redis_conn.lpush(name , dumps(message))
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
