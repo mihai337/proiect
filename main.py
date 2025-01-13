@@ -328,7 +328,7 @@ def gethistory(user : dict = Depends(verify_token)):
     doc_ref = firestore_db.collection("users").document(user['uid'])
     doc = doc_ref.get()
     if doc.exists:
-        return doc.to_dict()['history']
+        return doc.to_dict()['history'][::-1]
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No history found")
 
