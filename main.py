@@ -296,21 +296,19 @@ def paybill(uid : int, user : dict = Depends(verify_token)):
         result_fact = result_fact_ref.get()
 
         if not result.exists or not result_fact.exists:
-            rq.redis_conn.lpush(name , dumps(message))
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
         result = result.to_dict()
         result_fact = result_fact.to_dict()
 
         if result_fact["balance"] - float(message['amount']) < 0:
-            rq.redis_conn.lpush(name , dumps(message))
             raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
 
         result["balance"] = result["balance"] + float(message['amount'])
         result_fact["balance"] = result_fact["balance"] - float(message['amount'])
 
         result["history"].append({"from": name, "to": message['recipient'] , "amount" : float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
-        result_fact["history"].append({"from": name, "to": message['recipient'] , "amount" : -float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
+        result_fact["history"].append({"from": name, "to": message['recipient'] , "amount" : -float(message['amount']) , "message" : result['email'] + " bill has been payed"})
 
         result_ref.update(result)
         result_fact_ref.update(result_fact)
