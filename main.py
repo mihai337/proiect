@@ -287,10 +287,9 @@ def paybill(uid : int, user : dict = Depends(verify_token)):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Bill not found")
         
     try:
-        recipientDetails = auth.get_user_by_email(message['recipient'])
 
         result_ref = firestore_db.collection("users").document(name)
-        result_fact_ref = firestore_db.collection("users").document(recipientDetails.uid)
+        result_fact_ref = firestore_db.collection("users").document(message['username'])
 
         result = result_ref.get()
         result_fact = result_fact_ref.get()
@@ -301,14 +300,14 @@ def paybill(uid : int, user : dict = Depends(verify_token)):
         result = result.to_dict()
         result_fact = result_fact.to_dict()
 
-        if result_fact["balance"] - float(message['amount']) < 0:
+        if result["balance"] - float(message['amount']) < 0:
             raise HTTPException(status_code=status.HTTP_304_NOT_MODIFIED)
 
-        result["balance"] = result["balance"] + float(message['amount'])
-        result_fact["balance"] = result_fact["balance"] - float(message['amount'])
+        result["balance"] = result["balance"] - float(message['amount'])
+        result_fact["balance"] = result_fact["balance"] + float(message['amount'])
 
-        result["history"].append({"from": name, "to": message['recipient'] , "amount" : float(message['amount']) , "message" : message['recipient'] + " bill has been payed"})
-        result_fact["history"].append({"from": name, "to": message['recipient'] , "amount" : -float(message['amount']) , "message" : result['email'] + " bill has been payed"})
+        result["history"].append({"from": name, "to": message['recipient'] , "amount" : -float(message['amount']) , "message" : result_fact['email'] + " bill has been payed"})
+        result_fact["history"].append({"from": name, "to": message['recipient'] , "amount" : +float(message['amount']) , "message" : result['email'] + " bill has been payed"})
 
         result_ref.update(result)
         result_fact_ref.update(result_fact)
